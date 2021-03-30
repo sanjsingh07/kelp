@@ -184,6 +184,10 @@ You can find more details on the [CCXT_REST github page][ccxt-rest].
 
 [Postgres][postgres] v12.1 or later must be installed for Kelp to automatically write trades to a sql database along with updating the trader config file.
 
+### Using Auth0
+
+[Add here information of how to use Auth0 module]
+
 ## Examples
 
 It's easier to learn with examples! Take a look at the walkthrough guides and sample configuration files below.
