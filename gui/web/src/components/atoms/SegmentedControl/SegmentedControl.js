@@ -24,12 +24,9 @@ class SegmentedControl extends Component {
     }
 
     return (
-      <div>
-        <ul className={styles.segmentedControl}>
-          {segments}
-        </ul>
-        { this.props.error !== null && (<div><p className={styles.errorMessage}>{this.props.error}</p></div>)}
-      </div>
+      <ul className={styles.segmentedControl}>
+        {segments}
+      </ul>
     );
   }
 }

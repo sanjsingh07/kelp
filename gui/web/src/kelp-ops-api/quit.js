@@ -1,3 +1,5 @@
 export default (baseUrl) => {
-    return fetch(baseUrl + "/api/v1/quit");
+    return fetch(baseUrl + "/api/v1/quit",{
+        method: "POST"
+        });
 };

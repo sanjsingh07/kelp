@@ -7,11 +7,13 @@ import Button from './components/atoms/Button/Button';
 import Bots from './components/screens/Bots/Bots';
 import NewBot from './components/screens/NewBot/NewBot';
 import version from './kelp-ops-api/version';
-import serverMetadata from './kelp-ops-api/serverMetadata';
 import quit from './kelp-ops-api/quit';
 import fetchKelpErrors from './kelp-ops-api/fetchKelpErrors';
 import removeKelpErrors from './kelp-ops-api/removeKelpErrors';
 import Welcome from './components/molecules/Welcome/Welcome';
+import PrivateRoute from './components/PrivateRoute';
+import Profile from './components/screens/Profile';
+import { interceptor } from './kelp-ops-api/interceptor';
 
 let baseUrl = function () {
   let base_url = window.location.origin;
@@ -28,13 +30,11 @@ class App extends Component {
     super(props);
     this.state = {
       version: "",
-      server_metadata: null,
       kelp_errors: {},
       active_error: null, // { botName, level, errorList, index }
     };
 
     this.setVersion = this.setVersion.bind(this);
-    this.fetchServerMetadata = this.fetchServerMetadata.bind(this);
     this.quit = this.quit.bind(this);
     this.addError = this.addError.bind(this);
     this.addErrorToObject = this.addErrorToObject.bind(this);
@@ -49,7 +49,6 @@ class App extends Component {
 
   componentDidMount() {
     this.setVersion()
-    this.fetchServerMetadata();
 
     this.fetchKelpErrors();
     if (!this._fetchKelpErrorsTimer) {
@@ -70,23 +69,6 @@ class App extends Component {
         _this.setState({ version: resp });
       } else {
         setTimeout(_this.setVersion, 30000);
-      }
-    });
-  }
-
-  fetchServerMetadata() {
-    var _this = this;
-    this._asyncRequests["serverMetadata"] = serverMetadata(baseUrl).then(resp => {
-      if (!_this._asyncRequests["serverMetadata"]) {
-        // if it has been deleted it means we don't want to process the result
-        return
-      }
-
-      delete _this._asyncRequests["serverMetadata"];
-      if (!resp["error"]) {
-        _this.setState({ server_metadata: resp });
-      } else {
-        setTimeout(_this.fetchServerMetadata, 30000);
       }
     });
   }
@@ -315,8 +297,7 @@ class App extends Component {
 
   render() {
     // construction of metricsTracker in server_amd64.go (isTestnet) needs to logically match this variable
-    // we use the state because that is updated from the /serverMetadata endpoint
-    const enablePubnetBots = this.state.server_metadata ? !this.state.server_metadata.disable_pubnet : false;
+    const enablePubnetBots = true;
 
     let banner = (<div className={styles.banner}>
       <Button
@@ -335,8 +316,8 @@ class App extends Component {
 
     return (
       <div>
-        <div>{banner}</div>
-        <Router>
+        {/* <div>{banner}</div> */}
+        <Router >
           <Header version={this.state.version}/>
           <Route exact path="/"
             render={(props) => <Bots {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots} activeError={this.state.active_error} setActiveError={this.setActiveBotError} hideActiveError={this.hideActiveError} addError={this.addError} removeError={removeBotError} findErrors={findBotErrors}/>}
@@ -350,6 +331,23 @@ class App extends Component {
           <Route exact path="/details"
             render={(props) => <NewBot {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots}/>}
             />
+          {/* <PrivateRoute exact path="/"
+            component={(props) => <Bots {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots} activeError={this.state.active_error} setActiveError={this.setActiveBotError} hideActiveError={this.hideActiveError} addError={this.addError} removeError={removeBotError} findErrors={findBotErrors}/>}
+            />
+          <PrivateRoute exact path="/new"
+            component={(props) => <NewBot {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots}/>}
+            />
+          <PrivateRoute exact path="/edit"
+            component={(props) => <NewBot {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots}/>}
+            />
+          <PrivateRoute exact path="/details"
+            component={(props) => <NewBot {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots}/>}
+            />
+          <PrivateRoute exact path= "/profile"
+        component={(props)=><Profile /> }
+        /> */}
+        <PrivateRoute exact path= "/profile"
+        component={(props)=><Profile /> }/>
         </Router>
         <Welcome quitFn={this.quit}/>
       </div>

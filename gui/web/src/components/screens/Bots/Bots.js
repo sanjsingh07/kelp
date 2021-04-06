@@ -9,6 +9,10 @@ import autogenerate from '../../../kelp-ops-api/autogenerate';
 import listBots from '../../../kelp-ops-api/listBots';
 import Constants from '../../../Constants';
 import Modal from '../../molecules/Modal/Modal';
+import { withAuthenticationRequired } from "@auth0/auth0-react";
+import config from "../../../auth_config.json";
+
+const auth0enabled = config.auth0enabled;
 
 class Bots extends Component {
   constructor(props) {
@@ -186,4 +190,6 @@ class Bots extends Component {
   }
 }
 
-export default Bots;
+// export default Bots;
+const customExportBots = auth0enabled ? withAuthenticationRequired(Bots) : Bots;
+export default customExportBots;
