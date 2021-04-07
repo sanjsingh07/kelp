@@ -11,7 +11,6 @@ import quit from './kelp-ops-api/quit';
 import fetchKelpErrors from './kelp-ops-api/fetchKelpErrors';
 import removeKelpErrors from './kelp-ops-api/removeKelpErrors';
 import Welcome from './components/molecules/Welcome/Welcome';
-import PrivateRoute from './components/PrivateRoute';
 import Profile from './components/screens/Profile';
 import { interceptor } from './kelp-ops-api/interceptor';
 
@@ -317,6 +316,7 @@ class App extends Component {
     return (
       <div>
         {/* <div>{banner}</div> */}
+        <Profile/>
         <Router >
           <Header version={this.state.version}/>
           <Route exact path="/"
@@ -331,23 +331,6 @@ class App extends Component {
           <Route exact path="/details"
             render={(props) => <NewBot {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots}/>}
             />
-          {/* <PrivateRoute exact path="/"
-            component={(props) => <Bots {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots} activeError={this.state.active_error} setActiveError={this.setActiveBotError} hideActiveError={this.hideActiveError} addError={this.addError} removeError={removeBotError} findErrors={findBotErrors}/>}
-            />
-          <PrivateRoute exact path="/new"
-            component={(props) => <NewBot {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots}/>}
-            />
-          <PrivateRoute exact path="/edit"
-            component={(props) => <NewBot {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots}/>}
-            />
-          <PrivateRoute exact path="/details"
-            component={(props) => <NewBot {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots}/>}
-            />
-          <PrivateRoute exact path= "/profile"
-        component={(props)=><Profile /> }
-        /> */}
-        <PrivateRoute exact path= "/profile"
-        component={(props)=><Profile /> }/>
         </Router>
         <Welcome quitFn={this.quit}/>
       </div>

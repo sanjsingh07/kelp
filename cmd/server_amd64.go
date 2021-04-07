@@ -76,7 +76,8 @@ type serverInputs struct {
 }
 
 func init() {
-	file, _ := os.Open("auth_config.json")
+	absPath, _ := filepath.Abs("../gui/web/src/auth_config.json")
+	file, _ := os.Open(absPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	authConfiguration := AuthConfiguration{}

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"fmt"
+	"path/filepath"
 
 	"github.com/auth0/go-jwt-middleware"
 	"github.com/form3tech-oss/jwt-go"
@@ -37,7 +38,8 @@ type AuthConfiguration struct {
 var AuthConfig AuthConfiguration
 
 func init() {
-	file, _ := os.Open("auth_config.json")
+	absPath, _ := filepath.Abs("../gui/web/src/auth_config.json")
+	file, _ := os.Open(absPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	AuthConfig = AuthConfiguration{}

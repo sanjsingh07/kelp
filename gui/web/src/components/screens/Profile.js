@@ -1,54 +1,46 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import config from "../../auth_config.json";
 
 const Profile = () => {
-  const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
-  const [userMetadata, setUserMetadata] = useState(null);
+  const { getAccessTokenSilently } = useAuth0();
+  const { isLoading,isAuthenticated, loginWithRedirect } = useAuth0();
+  const audience = config.audience;
+  const scope = config.scope;
+
+  if (isLoading) {
+    return <div></div>;
+  }
+
+  if (!isAuthenticated) {
+    return loginWithRedirect();
+  }
+
+  if (isLoading) {
+    return <div></div>;
+  }
 
   useEffect(() => {
     const getUserMetadata = async () => {
+  
       try {
         const accessToken = await getAccessTokenSilently({
-          audience: `https://localhost:3000/api/v2/`,
-          scope: "read:current_user",
+          audience: audience,
+          scope: scope,
         });
-
-        // console.log("Access Token: "+accessToken);
-  
-        const userDetailsByIdUrl = `http://dev-6esg0i02.eu.auth0.com/users/${user.sub}`;
-        // console.log("userdetail: "+userDetailsByIdUrl);
-        
-        const metadataResponse = await fetch(userDetailsByIdUrl, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        
-        const { user_metadata } = await metadataResponse.json();
-  
-        setUserMetadata(user_metadata);
+        localStorage.setItem("accessToken", accessToken);
       } catch (e) {
         console.log(e.message);
       }
     };
   
     getUserMetadata();
-  }, []);
+  }, [isLoading, isAuthenticated, loginWithRedirect]);
 
   return (
-    isAuthenticated && (
+    
       <div>
-        <img src={user.picture} alt={user.name} />
-        <h2>{user.name}</h2>
-        <p>{user.email}</p>
-        <h3>User Metadata</h3>
-        {userMetadata ? (
-          <pre>{JSON.stringify(userMetadata, null, 2)}</pre>
-        ) : (
-          "No user metadata defined"
-        )}
       </div>
-    )
   );
 };
 

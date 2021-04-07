@@ -1,7 +1,7 @@
 {
     "auth0enabled" : true,
-    "domain": "dev-6esg0i02.eu.auth0.com",
-    "clientId": "7I47ob2UIUN0NxoJO8bmcbenXKF29hY5",
-    "audience": "https://localhost:3000/api/v2/",
-    "scope": "read:current_user update:current_user_metadata"
+    "domain": "domain-goes-here_example_dev-xxxxx.eu.auth0.com", 
+    "clientId": "clientID-here_example_7I47xxxxxxxxxxxxxnXKF29hY5",
+    "audience": "audience-here",
+    "scope": "scope-here"
   }

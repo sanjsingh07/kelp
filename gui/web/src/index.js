@@ -4,7 +4,7 @@ import './index.scss';
 import App from './App';
 import { Auth0Provider } from "@auth0/auth0-react";
 import * as serviceWorker from './serviceWorker';
-import config from "./auth_config.json";
+import config from "../src/auth_config.json";
 
 const auth0enabled = config.auth0enabled;
 
