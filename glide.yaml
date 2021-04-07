@@ -17,6 +17,10 @@ import:
   - clients/horizonclient
   - support/config
   - support/errors
+- package: github.com/auth0/go-jwt-middleware
+  version: v1.0.0
+- package: github.com/form3tech-oss/jwt-go
+  version: v3.2.2+incompatible
 ##############################################################
 # manually added dependencies to fix glide import resolution
 ##############################################################

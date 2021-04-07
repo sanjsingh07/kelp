@@ -16,6 +16,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"encoding/json"
 
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
@@ -58,6 +59,10 @@ const readyPlaceholder = "READY_STRING"
 const readyStringIndicator = "Serving frontend and API server on HTTP port"
 const downloadCcxtUpdateIntervalLogMillis = 1000
 
+type AuthConfiguration struct {
+    auth0enabled bool
+}
+
 type serverInputs struct {
 	port              *uint16
 	dev               *bool
@@ -71,6 +76,16 @@ type serverInputs struct {
 }
 
 func init() {
+	absPath, _ := filepath.Abs("../gui/web/src/auth_config.json")
+	file, _ := os.Open(absPath)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	authConfiguration := AuthConfiguration{}
+	err := decoder.Decode(&authConfiguration)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
 	options := serverInputs{}
 	options.port = serverCmd.Flags().Uint16P("port", "p", 8000, "port on which to serve")
 	options.dev = serverCmd.Flags().Bool("dev", false, "run in dev mode for hot-reloading of JS code")
@@ -380,7 +395,12 @@ func init() {
 
 		r := chi.NewRouter()
 		setMiddleware(r)
-		backend.SetRoutes(r, s)
+		if (authConfiguration.auth0enabled) {
+			backend.SetRoutesWithAuth0(r, s)
+		} else {
+			backend.SetRoutes(r, s)
+		}
+		// backend.SetRoutes(r, s)
 		// gui.FS is automatically compiled based on whether this is a local or deployment build
 		gui.FileServer(r, "/", gui.FS)
 
@@ -560,6 +580,16 @@ func runCcxtBinary(kos *kelpos.KelpOS, ccxtBinPath *kelpos.OSPath) error {
 }
 
 func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPort uint16) {
+
+	file, _ := os.Open("auth_config.json")
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	authConfiguration := AuthConfiguration{}
+	err := decoder.Decode(&authConfiguration)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
 	r := chi.NewRouter()
 	// Add CORS middleware around every request since both ports are different when running server in dev mode
 	r.Use(cors.New(cors.Options{
@@ -567,7 +597,12 @@ func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPo
 	}).Handler)
 
 	setMiddleware(r)
-	backend.SetRoutes(r, s)
+	if (authConfiguration.auth0enabled) {
+        backend.SetRoutesWithAuth0(r, s)
+    } else {
+        backend.SetRoutes(r, s)
+    }
+	// backend.SetRoutes(r, s)
 	portString := fmt.Sprintf(":%d", devAPIPort)
 	log.Printf("Serving API server on HTTP port: %d\n", devAPIPort)
 	e := http.ListenAndServe(portString, r)
