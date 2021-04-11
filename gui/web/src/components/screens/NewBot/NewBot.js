@@ -5,10 +5,6 @@ import getNewBotConfig from '../../../kelp-ops-api/getNewBotConfig';
 import upsertBotConfig from '../../../kelp-ops-api/upsertBotConfig';
 import fetchOptionsMetadata from '../../../kelp-ops-api/fetchOptionsMetadata';
 import LoadingAnimation from '../../atoms/LoadingAnimation/LoadingAnimation';
-import { withAuthenticationRequired } from "@auth0/auth0-react";
-import config from "../../../auth_config.json";
-
-const auth0enabled = config.auth0enabled;
 
 class NewBot extends Component {
   constructor(props) {
@@ -249,8 +245,8 @@ class NewBot extends Component {
   }
 }
 
-const customExportNewBot = auth0enabled ? withAuthenticationRequired(NewBot) : NewBot;
-export default customExportNewBot;
+// const customExportNewBot = auth0enabled ? withAuthenticationRequired(NewBot) : NewBot;
+export default NewBot;
 // export default withAuthenticationRequired(NewBot, {
 //   onRedirecting: () => <div> Loading... </div>
 // });

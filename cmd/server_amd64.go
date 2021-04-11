@@ -76,12 +76,12 @@ type serverInputs struct {
 }
 
 func init() {
-	absPath, _ := filepath.Abs("../gui/web/src/auth_config.json")
+	absPath, _ := filepath.Abs("../examples/configs/trader/auth_config.json")
 	file, _ := os.Open(absPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
-	authConfiguration := AuthConfiguration{}
-	err := decoder.Decode(&authConfiguration)
+	AuthConfiguration := AuthConfiguration{}
+	err := decoder.Decode(&AuthConfiguration)
 	if err != nil {
 		fmt.Println("error:", err)
 	}
@@ -395,7 +395,7 @@ func init() {
 
 		r := chi.NewRouter()
 		setMiddleware(r)
-		if (authConfiguration.auth0enabled) {
+		if (AuthConfiguration.auth0enabled) {
 			backend.SetRoutesWithAuth0(r, s)
 		} else {
 			backend.SetRoutes(r, s)
@@ -581,11 +581,12 @@ func runCcxtBinary(kos *kelpos.KelpOS, ccxtBinPath *kelpos.OSPath) error {
 
 func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPort uint16) {
 
-	file, _ := os.Open("auth_config.json")
+	absPath, _ := filepath.Abs("../examples/configs/trader/auth_config.json")
+	file, _ := os.Open(absPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
-	authConfiguration := AuthConfiguration{}
-	err := decoder.Decode(&authConfiguration)
+	AuthConfiguration := AuthConfiguration{}
+	err := decoder.Decode(&AuthConfiguration)
 	if err != nil {
 		fmt.Println("error:", err)
 	}
@@ -597,7 +598,7 @@ func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPo
 	}).Handler)
 
 	setMiddleware(r)
-	if (authConfiguration.auth0enabled) {
+	if (AuthConfiguration.auth0enabled) {
         backend.SetRoutesWithAuth0(r, s)
     } else {
         backend.SetRoutes(r, s)

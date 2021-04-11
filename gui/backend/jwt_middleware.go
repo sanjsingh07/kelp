@@ -38,7 +38,7 @@ type AuthConfiguration struct {
 var AuthConfig AuthConfiguration
 
 func init() {
-	absPath, _ := filepath.Abs("../gui/web/src/auth_config.json")
+	absPath, _ := filepath.Abs("../../examples/configs/trader/auth_config.json")
 	file, _ := os.Open(absPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
