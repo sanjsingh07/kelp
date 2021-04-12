@@ -1,5 +1,5 @@
 {
-    "delegated_signing_enabled" : false,
+    "delegated_signing_enabled" : true,
     "DELEGATED_SIGNING_URL": "DELEGATED_SIGNING_URL_GOES_HERE", 
     "callback": "callback_url_goes_here"
   }

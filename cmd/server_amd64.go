@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/png"
@@ -16,7 +17,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"encoding/json"
 
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
@@ -60,7 +60,7 @@ const readyStringIndicator = "Serving frontend and API server on HTTP port"
 const downloadCcxtUpdateIntervalLogMillis = 1000
 
 type AuthConfiguration struct {
-    auth0enabled bool
+	Auth0enabled bool	`json:"auth0enabled"`
 }
 
 type serverInputs struct {
@@ -76,7 +76,7 @@ type serverInputs struct {
 }
 
 func init() {
-	absPath, _ := filepath.Abs("../examples/configs/trader/auth_config.json")
+	absPath, _ := filepath.Abs("../kelp/examples/configs/trader/auth_config.json")
 	file, _ := os.Open(absPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
@@ -349,6 +349,7 @@ func init() {
 		}
 
 		dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+		// usersSpecificBot := dataPath.Jion("user")
 		botConfigsPath := dataPath.Join("configs")
 		botLogsPath := dataPath.Join("logs")
 		s, e := backend.MakeAPIServer(
@@ -395,7 +396,7 @@ func init() {
 
 		r := chi.NewRouter()
 		setMiddleware(r)
-		if (AuthConfiguration.auth0enabled) {
+		if AuthConfiguration.Auth0enabled {
 			backend.SetRoutesWithAuth0(r, s)
 		} else {
 			backend.SetRoutes(r, s)
@@ -581,7 +582,7 @@ func runCcxtBinary(kos *kelpos.KelpOS, ccxtBinPath *kelpos.OSPath) error {
 
 func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPort uint16) {
 
-	absPath, _ := filepath.Abs("../examples/configs/trader/auth_config.json")
+	absPath, _ := filepath.Abs("../kelp/examples/configs/trader/auth_config.json")
 	file, _ := os.Open(absPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
@@ -598,11 +599,11 @@ func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPo
 	}).Handler)
 
 	setMiddleware(r)
-	if (AuthConfiguration.auth0enabled) {
-        backend.SetRoutesWithAuth0(r, s)
-    } else {
-        backend.SetRoutes(r, s)
-    }
+	if AuthConfiguration.Auth0enabled {
+		backend.SetRoutesWithAuth0(r, s)
+	} else {
+		backend.SetRoutes(r, s)
+	}
 	// backend.SetRoutes(r, s)
 	portString := fmt.Sprintf(":%d", devAPIPort)
 	log.Printf("Serving API server on HTTP port: %d\n", devAPIPort)

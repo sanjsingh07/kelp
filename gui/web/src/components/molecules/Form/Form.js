@@ -524,15 +524,18 @@ class Form extends Component {
               {deConfigEnabled ? (
               <FormSection>
                 <FieldItem>
-                <SecretKey
-                  label="Trader account public key"
-                  isTestNet={isTestNet}
-                  secret={this.props.configData.trader_config.trading_public_seed}
-                  // onSecretChange={(event) => { this.props.onChange("trader_config.trading_public_seed", event) }}
-                  // onError={() => this.getError("trader_config.trading_public_seed")}
+                <Label>Trader account public key</Label>
+                <Input
+                  value={this.props.configData.trader_config.trading_key_seed}
+                  // label="Trader account public key"
+                  type="string"
+                  // isTestNet={isTestNet}
+                  // secret={this.props.configData.trader_config.trading_public_seed}
+                  onChange={(event) => { this.props.onChange("trader_config.trading_key_seed", event) }}
+                  onError={() => this.getError("trader_config.trading_key_seed")}
                   // onNewKeyClick={() => this.newSecret("trader_config.trading_public_seed")}
                   readOnly={this.props.readOnly}
-                  eventPrefix={this.props.eventPrefix + "-publickey-trader"}
+                  // eventPrefix={this.props.eventPrefix + "-publickey-trader"}
                 />
                 </FieldItem>
              </FormSection>

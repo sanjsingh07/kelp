@@ -1,13 +1,34 @@
 package trader
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	hProtocol "github.com/stellar/go/protocols/horizon"
 	"github.com/stellar/kelp/support/postgresdb"
 	"github.com/stellar/kelp/support/toml"
 	"github.com/stellar/kelp/support/utils"
 )
+
+type DelegatedConfiguration struct {
+	delegated_signing_enabled bool	`json:"delegated_signing_enabled"`
+}
+
+var DelConfig DelegatedConfiguration
+
+func init() {
+	absPath, _ := filepath.Abs("../kelp/gui/web/src/delegated_signing_cfg.json")
+	file, _ := os.Open(absPath)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	DelConfig = DelegatedConfiguration{}
+	err := decoder.Decode(&DelConfig)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+}
 
 // XLM is a constant for XLM
 const XLM = "XLM"
@@ -21,12 +42,13 @@ type FeeConfig struct {
 
 // BotConfig represents the configuration params for the bot
 type BotConfig struct {
-	SourceSecretSeed  string `valid:"-" toml:"SOURCE_SECRET_SEED" json:"source_secret_seed"`
-	TradingSecretSeed string `valid:"-" toml:"TRADING_SECRET_SEED" json:"trading_secret_seed"`
-	AssetCodeA        string `valid:"-" toml:"ASSET_CODE_A" json:"asset_code_a"`
-	IssuerA           string `valid:"-" toml:"ISSUER_A" json:"issuer_a"`
-	AssetCodeB        string `valid:"-" toml:"ASSET_CODE_B" json:"asset_code_b"`
-	IssuerB           string `valid:"-" toml:"ISSUER_B" json:"issuer_b"`
+	SourceSecretSeed string `valid:"-" toml:"SOURCE_SECRET_SEED" json:"source_secret_seed"`
+	TradingKeySeed   string `valid:"-" toml:"TRADING_KEY_SEED" json:"trading_key_seed"`
+	// TradingPublicSeed string `valid:"-" toml:"TRADING_PUBLIC_SEED" json:"trading_public_seed"`
+	AssetCodeA string `valid:"-" toml:"ASSET_CODE_A" json:"asset_code_a"`
+	IssuerA    string `valid:"-" toml:"ISSUER_A" json:"issuer_a"`
+	AssetCodeB string `valid:"-" toml:"ASSET_CODE_B" json:"asset_code_b"`
+	IssuerB    string `valid:"-" toml:"ISSUER_B" json:"issuer_b"`
 	// Deprecated: use TICK_INTERVAL_MILLIS instead
 	TickIntervalSecondsDeprecated      int32      `valid:"-" toml:"TICK_INTERVAL_SECONDS" json:"tick_interval_seconds" deprecated:"true"`
 	TickIntervalMillis                 int32      `valid:"-" toml:"TICK_INTERVAL_MILLIS" json:"tick_interval_millis"`
@@ -77,7 +99,7 @@ type BotConfig struct {
 // MakeBotConfig factory method for BotConfig
 func MakeBotConfig(
 	sourceSecretSeed string,
-	tradingSecretSeed string,
+	tradingKeySeed string,
 	assetCodeA string,
 	issuerA string,
 	assetCodeB string,
@@ -100,7 +122,7 @@ func MakeBotConfig(
 ) *BotConfig {
 	return &BotConfig{
 		SourceSecretSeed:                   sourceSecretSeed,
-		TradingSecretSeed:                  tradingSecretSeed,
+		TradingKeySeed:                     tradingKeySeed,
 		AssetCodeA:                         assetCodeA,
 		IssuerA:                            issuerA,
 		AssetCodeB:                         assetCodeB,
@@ -130,7 +152,7 @@ func (b BotConfig) String() string {
 		"EXCHANGE_PARAMS":          utils.Hide,
 		"EXCHANGE_HEADERS":         utils.Hide,
 		"SOURCE_SECRET_SEED":       utils.SecretKey2PublicKey,
-		"TRADING_SECRET_SEED":      utils.SecretKey2PublicKey,
+		"TRADING_KEY_SEED":         utils.SecretKey2PublicKey,
 		"ALERT_API_KEY":            utils.Hide,
 		"GOOGLE_CLIENT_ID":         utils.Hide,
 		"GOOGLE_CLIENT_SECRET":     utils.Hide,
@@ -202,7 +224,10 @@ func (b *BotConfig) Init() error {
 	}
 	b.assetQuote = *asset
 
-	b.tradingAccount, e = utils.ParseSecret(b.TradingSecretSeed)
+	if !DelConfig.delegated_signing_enabled {
+		b.tradingAccount, e = utils.ParseSecret(b.TradingKeySeed)
+	}
+
 	if e != nil {
 		return e
 	}

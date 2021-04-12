@@ -342,7 +342,7 @@ func makeExchangeShimSdex(
 		ieif,
 		exchangeShim,
 		botConfig.SourceSecretSeed,
-		botConfig.TradingSecretSeed,
+		botConfig.TradingKeySeed,
 		botConfig.SourceAccount(),
 		botConfig.TradingAccount(),
 		network,

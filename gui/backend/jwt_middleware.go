@@ -3,12 +3,12 @@ package backend
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
-	"fmt"
 	"path/filepath"
 
-	"github.com/auth0/go-jwt-middleware"
+	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/form3tech-oss/jwt-go"
 )
 
@@ -30,15 +30,15 @@ type JSONWebKeys struct {
 }
 
 type AuthConfiguration struct {
-    auth0enabled bool
-	domain string
-	audience string
+	Auth0enabled bool	`json:"auth0enabled"`
+	Domain       string	`json:"domain"`
+	Audience     string	`json:"audience"`
 }
 
 var AuthConfig AuthConfiguration
 
 func init() {
-	absPath, _ := filepath.Abs("../../examples/configs/trader/auth_config.json")
+	absPath, _ := filepath.Abs("../kelp/examples/configs/trader/auth_config.json")
 	file, _ := os.Open(absPath)
 	defer file.Close()
 	decoder := json.NewDecoder(file)
@@ -46,62 +46,61 @@ func init() {
 	err := decoder.Decode(&AuthConfig)
 	if err != nil {
 		fmt.Println("error:", err)
-}
+	}
 }
 
 var JWTMiddlewareVar = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 		// Verify 'iss' claim
-		iss := "https://" +AuthConfig.domain+"/"
+		iss := "https://" + AuthConfig.Domain + "/"
 		checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
 		if !checkIss {
 			return token, errors.New("Invalid issuer.")
 		}
-	  // Verify 'aud' claim
-	  aud := AuthConfig.audience
-	  checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
-	  if !checkAud {
-		  return token, errors.New("Invalid audience.")
-	  }
-	  
+		// Verify 'aud' claim
+		aud := AuthConfig.Audience
+		checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
+		if !checkAud {
+			return token, errors.New("Invalid audience.")
+		}
 
-	  cert, err := getPemCert(token)
-	  if err != nil {
-		  panic(err.Error())
-	  }
+		cert, err := getPemCert(token)
+		if err != nil {
+			panic(err.Error())
+		}
 
-	  result, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
-	  return result, nil
+		result, _ := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
+		return result, nil
 	},
 	SigningMethod: jwt.SigningMethodRS256,
 })
 
 func getPemCert(token *jwt.Token) (string, error) {
-    cert := ""
-    resp, err := http.Get("https://"+AuthConfig.domain+"/.well-known/jwks.json")
+	cert := ""
+	resp, err := http.Get("https://" + AuthConfig.Domain + "/.well-known/jwks.json")
 
-    if err != nil {
-        return cert, err
-    }
-    defer resp.Body.Close()
+	if err != nil {
+		return cert, err
+	}
+	defer resp.Body.Close()
 
-    var jwks = Jwks{}
-    err = json.NewDecoder(resp.Body).Decode(&jwks)
+	var jwks = Jwks{}
+	err = json.NewDecoder(resp.Body).Decode(&jwks)
 
-    if err != nil {
-        return cert, err
-    }
+	if err != nil {
+		return cert, err
+	}
 
-    for k, _ := range jwks.Keys {
-        if token.Header["kid"] == jwks.Keys[k].Kid {
-            cert = "-----BEGIN CERTIFICATE-----\n" + jwks.Keys[k].X5c[0] + "\n-----END CERTIFICATE-----"
-        }
-    }
+	for k, _ := range jwks.Keys {
+		if token.Header["kid"] == jwks.Keys[k].Kid {
+			cert = "-----BEGIN CERTIFICATE-----\n" + jwks.Keys[k].X5c[0] + "\n-----END CERTIFICATE-----"
+		}
+	}
 
-    if cert == "" {
-        err := errors.New("Unable to find appropriate key.")
-        return cert, err
-    }
+	if cert == "" {
+		err := errors.New("Unable to find appropriate key.")
+		return cert, err
+	}
 
-    return cert, nil
+	return cert, nil
 }
