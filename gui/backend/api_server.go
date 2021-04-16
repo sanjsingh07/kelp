@@ -244,37 +244,17 @@ func (s *APIServer) runKelpCommandBackground(namespace string, cmd string) (*kel
 
 func (s *APIServer) setupOpsDirectory() error {
 
-	// kos := kelpos.GetKelpOS()
-	// getUserIDvar := GetUserIDfromjwt()
-	// trimmedID := strings.TrimLeft(getUserIDvar, "auth0|")
-	// fmt.Println("from list_bots file: ", trimmedID)
-	// UserIDGlobal = "user_"+trimmedID
-	// dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
-	// fmt.Println("Printing from list_bots.go file:", UserIDGlobal)
-	// usersSpecificBot := dataPath.Join(UserIDGlobal)
-	// botConfigsPath := usersSpecificBot.Join("configs")
-	// botLogsPath := usersSpecificBot.Join("logs")
-	// s.botConfigsPath = botConfigsPath
-	// s.usersSpecificBot = usersSpecificBot
-	// s.botLogsPath = botLogsPath
-
-	// fmt.Println("printing from api_server: ", s.usersSpecificBot)
-	// fmt.Println("printing from api_serverz test")
-
 	e := s.kos.Mkdir(UsersSpecificBot)
-	fmt.Println("Printing from api_server file: line 265", UsersSpecificBot.Unix())
 	if e != nil {
 		return fmt.Errorf("error setting up users directory (%s): %s\n", UsersSpecificBot, e)
 	}
 
 	e = s.kos.Mkdir(BotConfigsPath)
-	fmt.Println("Printing from api_server file: line 271", BotConfigsPath.Unix())
 	if e != nil {
 		return fmt.Errorf("error setting up configs directory (%s): %s\n", BotConfigsPath, e)
 	}
 
 	e = s.kos.Mkdir(BotLogsPath)
-	fmt.Println("Printing from api_server file: line 277", BotLogsPath.Unix())
 	if e != nil {
 		return fmt.Errorf("error setting up logs directory (%s): %s\n", BotLogsPath, e)
 	}

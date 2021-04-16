@@ -29,7 +29,6 @@ func (s *APIServer) getBotConfig(w http.ResponseWriter, r *http.Request) {
 
 	filenamePair := model2.GetBotFilenames(botName, "buysell")
 	traderFilePath := BotConfigsPath.Join(filenamePair.Trader)
-	fmt.Println("Printing from get_bot_config file: line 32", BotConfigsPath.Unix())
 	var botConfig trader.BotConfig
 	e = config.Read(traderFilePath.Native(), &botConfig)
 	if e != nil {
@@ -43,7 +42,6 @@ func (s *APIServer) getBotConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	strategyFilePath := BotConfigsPath.Join(filenamePair.Strategy)
-	fmt.Println("Printing from get_bot_config file: line 46", BotConfigsPath.Unix())
 	var buysellConfig plugins.BuySellConfig
 	e = config.Read(strategyFilePath.Native(), &buysellConfig)
 	if e != nil {

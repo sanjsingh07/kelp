@@ -135,8 +135,6 @@ func init() {
 			DelegatedEnabled :customConfigVar.DelegatedEnabled,
 		}
 
-		// var usersSpecificBot *kelpos.OSPath
-
 		//writing to "custom_config_ui" file in ./gui/web/src
 		file, _ := json.MarshalIndent(shortVarForUIConfig, "", " ")
 		_ = ioutil.WriteFile(filePathname, file, 0644)
@@ -375,17 +373,8 @@ func init() {
 			}
 		}
 
-		// getUserIDvar := backend.GetUserIDfromjwt()
-
-		// trimmedID := strings.TrimLeft(getUserIDvar, "auth0|")
-
-		// fmt.Println("from system amd: ", trimmedID)
-
-		// UserIDGlobal = "user_"+trimmedID
 		// dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
-		// fmt.Println("Printing from serveramd file:", UserIDGlobal)
-		// usersSpecificBot := dataPath.Join(UserIDGlobal)
-		// usersSpecificBot = dataPath.Join(trimmedID)
+		// usersSpecificBot := dataPath.Join("user_id_goes_here")
 		// botConfigsPath := usersSpecificBot.Join("configs")
 		// botLogsPath := usersSpecificBot.Join("logs")
 		s, e := backend.MakeAPIServer(

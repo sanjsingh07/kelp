@@ -78,19 +78,16 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 	// Note that /mnt/c is unlikely to be valid in windows (but is valid in the linux subsystem) since it's usually prefixed by the
 	// volume (C:\ etc.), which is why relative paths works so well here as it avoids this confusion.
 	traderRelativeConfigPath, e := BotConfigsPath.Join(filenamePair.Trader).RelFromPath(s.kos.GetDotKelpWorkingDir())
-	fmt.Println("Printing from start_bot file: line 81", BotConfigsPath.Unix())
 	if e != nil {
 		return fmt.Errorf("unable to get relative path of trader config file from basepath: %s", e)
 	}
 
 	stratRelativeConfigPath, e := BotConfigsPath.Join(filenamePair.Strategy).RelFromPath(s.kos.GetDotKelpWorkingDir())
-	fmt.Println("Printing from start_bot file: line 87", BotConfigsPath.Unix())
 	if e != nil {
 		return fmt.Errorf("unable to get relative path of strategy config file from basepath: %s", e)
 	}
 
 	logRelativePrefixPath, e := BotLogsPath.Join(logPrefix).RelFromPath(s.kos.GetDotKelpWorkingDir())
-	fmt.Println("Printing from start_bot file: line 93", BotLogsPath.Unix())
 	if e != nil {
 		return fmt.Errorf("unable to get relative path of log prefix path from basepath: %s", e)
 	}
@@ -98,7 +95,6 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 	// prevent starting pubnet bots if pubnet is disabled
 	var botConfig trader.BotConfig
 	traderLoadReadPath := BotConfigsPath.Join(filenamePair.Trader)
-	fmt.Println("Printing from start_bot file: line 101", BotConfigsPath.Unix())
 	e = config.Read(traderLoadReadPath.Native(), &botConfig)
 	if e != nil {
 		return fmt.Errorf("cannot read bot config at path '%s': %s", traderLoadReadPath.Native(), e)

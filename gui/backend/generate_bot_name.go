@@ -58,7 +58,6 @@ func (s *APIServer) doGenerateBotName() (string, error) {
 
 func (s *APIServer) prefixExists(prefix string) (bool, error) {
 	command := fmt.Sprintf("ls %s | grep %s", BotConfigsPath.Unix(), prefix)
-	fmt.Println("Printing from generate_bot_name file: line 61", BotConfigsPath.Unix())
 	_, e := s.kos.Blocking("prefix", command)
 	if e != nil {
 		if strings.Contains(e.Error(), "exit status 1") {

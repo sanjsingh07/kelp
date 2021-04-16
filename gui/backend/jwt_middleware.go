@@ -3,7 +3,7 @@ package backend
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	// "fmt"
 	"net/http"
 	"strings"
 
@@ -38,19 +38,13 @@ var UsersSpecificBot, BotConfigsPath, BotLogsPath *kelpos.OSPath
 func callFromJWTMiddlewareVar() {
 	kos := kelpos.GetKelpOS()
 	trimmedID := strings.TrimLeft(userIDfromjwt, "auth0|")
-	// fmt.Println("from list_bots file: ", trimmedID)
 
 	UserIDGlobal := "user_"+trimmedID
 	dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
-	// fmt.Println("Printing from list_bots.go file:", UserIDGlobal)
 
 	UsersSpecificBot = dataPath.Join(UserIDGlobal)
 	BotConfigsPath = UsersSpecificBot.Join("configs")
 	BotLogsPath = UsersSpecificBot.Join("logs")
-
-	fmt.Println("Printing from jwtMiddleware file: line 47-48", UsersSpecificBot.AsString())
-	fmt.Println("Printing from jwtMiddleware file: line 47-48", BotConfigsPath.AsString())
-	fmt.Println("Printing from jwtMiddleware file: line 47-48", BotLogsPath.AsString())
 }
 
 
@@ -80,9 +74,7 @@ var JWTMiddlewareVar = jwtmiddleware.New(jwtmiddleware.Options{
 
 		
 		if(checkIss){
-			// User_ID_struct_var.User_id_token = token.Claims.(jwt.MapClaims)["sub"].(string)
 			userIDfromjwt = token.Claims.(jwt.MapClaims)["sub"].(string)
-			fmt.Println("Printing from jwtMiddleware file: line 85", userIDfromjwt)
 		}
 
 		callFromJWTMiddlewareVar()
