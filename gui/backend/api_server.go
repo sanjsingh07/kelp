@@ -21,8 +21,9 @@ import (
 // APIServer is an instance of the API service
 type APIServer struct {
 	kelpBinPath       *kelpos.OSPath
-	botConfigsPath    *kelpos.OSPath
-	botLogsPath       *kelpos.OSPath
+	// usersSpecificBot  *kelpos.OSPath
+	// botConfigsPath    *kelpos.OSPath
+	// botLogsPath       *kelpos.OSPath
 	kos               *kelpos.KelpOS
 	horizonTestnetURI string
 	horizonPubnetURI  string
@@ -42,8 +43,9 @@ type APIServer struct {
 // MakeAPIServer is a factory method
 func MakeAPIServer(
 	kos *kelpos.KelpOS,
-	botConfigsPath *kelpos.OSPath,
-	botLogsPath *kelpos.OSPath,
+	// usersSpecificBot *kelpos.OSPath,
+	// botConfigsPath *kelpos.OSPath,
+	// botLogsPath *kelpos.OSPath,
 	horizonTestnetURI string,
 	apiTestNet *horizonclient.Client,
 	horizonPubnetURI string,
@@ -65,8 +67,9 @@ func MakeAPIServer(
 
 	return &APIServer{
 		kelpBinPath:           kelpBinPath,
-		botConfigsPath:        botConfigsPath,
-		botLogsPath:           botLogsPath,
+		// usersSpecificBot:	   usersSpecificBot,
+		// botConfigsPath:        botConfigsPath,
+		// botLogsPath:           botLogsPath,
 		kos:                   kos,
 		horizonTestnetURI:     horizonTestnetURI,
 		horizonPubnetURI:      horizonPubnetURI,
@@ -84,15 +87,15 @@ func MakeAPIServer(
 }
 
 // InitBackend initializes anything required to get the backend ready to serve
-func (s *APIServer) InitBackend() error {
-	// initial load of bots into memory
-	_, e := s.doListBots()
-	if e != nil {
-		return fmt.Errorf("error listing/loading bots: %s", e)
-	}
+// func (s *APIServer) InitBackend() error {
+// 	// initial load of bots into memory
+// 	_, e := s.doListBots()
+// 	if e != nil {
+// 		return fmt.Errorf("error listing/loading bots: %s", e)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (s *APIServer) parseBotName(r *http.Request) (string, error) {
 	botNameBytes, e := ioutil.ReadAll(r.Body)
@@ -240,14 +243,40 @@ func (s *APIServer) runKelpCommandBackground(namespace string, cmd string) (*kel
 }
 
 func (s *APIServer) setupOpsDirectory() error {
-	e := s.kos.Mkdir(s.botConfigsPath)
+
+	// kos := kelpos.GetKelpOS()
+	// getUserIDvar := GetUserIDfromjwt()
+	// trimmedID := strings.TrimLeft(getUserIDvar, "auth0|")
+	// fmt.Println("from list_bots file: ", trimmedID)
+	// UserIDGlobal = "user_"+trimmedID
+	// dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+	// fmt.Println("Printing from list_bots.go file:", UserIDGlobal)
+	// usersSpecificBot := dataPath.Join(UserIDGlobal)
+	// botConfigsPath := usersSpecificBot.Join("configs")
+	// botLogsPath := usersSpecificBot.Join("logs")
+	// s.botConfigsPath = botConfigsPath
+	// s.usersSpecificBot = usersSpecificBot
+	// s.botLogsPath = botLogsPath
+
+	// fmt.Println("printing from api_server: ", s.usersSpecificBot)
+	// fmt.Println("printing from api_serverz test")
+
+	e := s.kos.Mkdir(UsersSpecificBot)
+	fmt.Println("Printing from api_server file: line 265", UsersSpecificBot.Unix())
 	if e != nil {
-		return fmt.Errorf("error setting up configs directory (%s): %s\n", s.botConfigsPath, e)
+		return fmt.Errorf("error setting up users directory (%s): %s\n", UsersSpecificBot, e)
 	}
 
-	e = s.kos.Mkdir(s.botLogsPath)
+	e = s.kos.Mkdir(BotConfigsPath)
+	fmt.Println("Printing from api_server file: line 271", BotConfigsPath.Unix())
 	if e != nil {
-		return fmt.Errorf("error setting up logs directory (%s): %s\n", s.botLogsPath, e)
+		return fmt.Errorf("error setting up configs directory (%s): %s\n", BotConfigsPath, e)
+	}
+
+	e = s.kos.Mkdir(BotLogsPath)
+	fmt.Println("Printing from api_server file: line 277", BotLogsPath.Unix())
+	if e != nil {
+		return fmt.Errorf("error setting up logs directory (%s): %s\n", BotLogsPath, e)
 	}
 
 	return nil

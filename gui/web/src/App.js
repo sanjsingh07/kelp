@@ -11,7 +11,7 @@ import quit from './kelp-ops-api/quit';
 import fetchKelpErrors from './kelp-ops-api/fetchKelpErrors';
 import removeKelpErrors from './kelp-ops-api/removeKelpErrors';
 import Welcome from './components/molecules/Welcome/Welcome';
-import Profile from './components/screens/Profile';
+import LoginRedirect from './components/screens/LoginRedirect';
 import { interceptor } from './kelp-ops-api/interceptor';
 
 let baseUrl = function () {
@@ -316,9 +316,10 @@ class App extends Component {
     return (
       <div>
         {/* <div>{banner}</div> */}
-        <Profile/>
+        <LoginRedirect/>
         <Router >
           <Header version={this.state.version}/>
+          <LoginRedirect/>
           <Route exact path="/"
             render={(props) => <Bots {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots} activeError={this.state.active_error} setActiveError={this.setActiveBotError} hideActiveError={this.hideActiveError} addError={this.addError} removeError={removeBotError} findErrors={findBotErrors}/>}
             />

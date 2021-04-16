@@ -1,15 +1,13 @@
 import React, { useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import config from "../../auth_config.json";
+import config from "../../custom_config_ui.json";
+import { withAuthenticationRequired } from "@auth0/auth0-react";
 
-const Profile = () => {
+const LoginRedirect = () => {
   const { getAccessTokenSilently } = useAuth0();
   const { isLoading,isAuthenticated, loginWithRedirect } = useAuth0();
-  const audience = config.audience;
-  const scope = config.scope;
-
   if (isLoading) {
-    return <div></div>;
+    return <></>;
   }
 
   if (!isAuthenticated) {
@@ -17,17 +15,14 @@ const Profile = () => {
   }
 
   if (isLoading) {
-    return <div></div>;
+    return <></>;
   }
 
   useEffect(() => {
     const getUserMetadata = async () => {
   
       try {
-        const accessToken = await getAccessTokenSilently({
-          audience: audience,
-          scope: scope,
-        });
+        const accessToken = await getAccessTokenSilently();
         localStorage.setItem("accessToken", accessToken);
       } catch (e) {
         console.log(e.message);
@@ -37,12 +32,16 @@ const Profile = () => {
     getUserMetadata();
   }, [isLoading, isAuthenticated, loginWithRedirect]);
 
+  if (isLoading) {
+    return <></>;
+  }
+
   return (
-    
-      <div>
-      </div>
+      <>
+      </>
   );
 };
 
-
-export default Profile;
+export default LoginRedirect;
+// const customExportProfile = config.auth0_enabled ? withAuthenticationRequired(Profile) : Profile;
+// export default customExportProfile;

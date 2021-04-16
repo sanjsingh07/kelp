@@ -1,7 +1,7 @@
 import fetchIntercept from 'fetch-intercept';
-import authConfig from '../../src/auth_config.json';
+import authConfig from '../../src/custom_config_ui.json';
 
-const AccessToken = authConfig.auth0enabled ? localStorage.getItem('accessToken') : null;
+const AccessToken = authConfig.auth0_enabled ? localStorage.getItem('accessToken') : null;
 
 export const interceptor = fetchIntercept.register({
     request: function (url, config) {

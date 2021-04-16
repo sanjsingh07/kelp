@@ -5,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
+	"strings"
 
-	jwtmiddleware "github.com/auth0/go-jwt-middleware"
+	"github.com/auth0/go-jwt-middleware"
 	"github.com/form3tech-oss/jwt-go"
+	"github.com/stellar/kelp/configStruct"
+	"github.com/stellar/kelp/support/kelpos"
 )
 
 type Response struct {
@@ -29,41 +30,63 @@ type JSONWebKeys struct {
 	X5c []string `json:"x5c"`
 }
 
-type AuthConfiguration struct {
-	Auth0enabled bool	`json:"auth0enabled"`
-	Domain       string	`json:"domain"`
-	Audience     string	`json:"audience"`
+var CustomConfigVar configStruct.CustomConfigStruct
+
+var userIDfromjwt string
+var UsersSpecificBot, BotConfigsPath, BotLogsPath *kelpos.OSPath
+
+func callFromJWTMiddlewareVar() {
+	kos := kelpos.GetKelpOS()
+	trimmedID := strings.TrimLeft(userIDfromjwt, "auth0|")
+	// fmt.Println("from list_bots file: ", trimmedID)
+
+	UserIDGlobal := "user_"+trimmedID
+	dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+	// fmt.Println("Printing from list_bots.go file:", UserIDGlobal)
+
+	UsersSpecificBot = dataPath.Join(UserIDGlobal)
+	BotConfigsPath = UsersSpecificBot.Join("configs")
+	BotLogsPath = UsersSpecificBot.Join("logs")
+
+	fmt.Println("Printing from jwtMiddleware file: line 47-48", UsersSpecificBot.AsString())
+	fmt.Println("Printing from jwtMiddleware file: line 47-48", BotConfigsPath.AsString())
+	fmt.Println("Printing from jwtMiddleware file: line 47-48", BotLogsPath.AsString())
 }
 
-var AuthConfig AuthConfiguration
 
-func init() {
-	absPath, _ := filepath.Abs("../kelp/examples/configs/trader/auth_config.json")
-	file, _ := os.Open(absPath)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	AuthConfig = AuthConfiguration{}
-	err := decoder.Decode(&AuthConfig)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-}
 
 var JWTMiddlewareVar = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 		// Verify 'iss' claim
-		iss := "https://" + AuthConfig.Domain + "/"
+		iss := "https://" + CustomConfigVar.Domain + "/"
 		checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
 		if !checkIss {
 			return token, errors.New("Invalid issuer.")
 		}
+
 		// Verify 'aud' claim
-		aud := AuthConfig.Audience
-		checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
-		if !checkAud {
-			return token, errors.New("Invalid audience.")
+		// audPass := CustomConfigVar.Audience
+		// checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(audPass, false)
+		// if !checkAud {
+		// 	return token, errors.New("Invalid audience.")
+		// }
+
+		// fmt.Println("IM PRINTING FROM JWT RIGHT HERE: ", CustomConfigVar.Domain)
+		// fmt.Println(token.Claims.(jwt.MapClaims)["aud"])
+		// fmt.Println(token.Claims.(jwt.MapClaims)["sub"])
+		// fmt.Printf("aud1st = %T\n", token.Claims.(jwt.MapClaims)["aud"])
+		// fmt.Printf("aud1st = %T\n", token.Claims.(jwt.MapClaims)["aud"].([]string))
+		// fmt.Printf("aud1st = %T\n", token.Claims.(jwt.MapClaims)["aud"].(string))
+
+		
+		if(checkIss){
+			// User_ID_struct_var.User_id_token = token.Claims.(jwt.MapClaims)["sub"].(string)
+			userIDfromjwt = token.Claims.(jwt.MapClaims)["sub"].(string)
+			fmt.Println("Printing from jwtMiddleware file: line 85", userIDfromjwt)
 		}
 
+		callFromJWTMiddlewareVar()
+		
 		cert, err := getPemCert(token)
 		if err != nil {
 			panic(err.Error())
@@ -77,7 +100,7 @@ var JWTMiddlewareVar = jwtmiddleware.New(jwtmiddleware.Options{
 
 func getPemCert(token *jwt.Token) (string, error) {
 	cert := ""
-	resp, err := http.Get("https://" + AuthConfig.Domain + "/.well-known/jwks.json")
+	resp, err := http.Get("https://" + CustomConfigVar.Domain + "/.well-known/jwks.json")
 
 	if err != nil {
 		return cert, err

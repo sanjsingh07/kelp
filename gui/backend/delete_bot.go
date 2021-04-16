@@ -70,7 +70,8 @@ func (s *APIServer) deleteBot(w http.ResponseWriter, r *http.Request) {
 
 	// delete configs
 	botPrefix := model2.GetPrefix(botName)
-	botConfigPath := s.botConfigsPath.Join(botPrefix)
+	botConfigPath := BotConfigsPath.Join(botPrefix)
+	fmt.Println("Printing from delete_bot file: line 74", BotConfigsPath.Unix())
 	_, e = s.kos.Blocking("rm", fmt.Sprintf("rm %s*", botConfigPath.Unix()))
 	if e != nil {
 		s.writeKelpError(w, makeKelpErrorResponseWrapper(

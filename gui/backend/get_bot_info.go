@@ -70,7 +70,8 @@ func (s *APIServer) runGetBotInfoDirect(w http.ResponseWriter, botName string) {
 	}
 
 	filenamePair := model2.GetBotFilenames(botName, buysell)
-	traderFilePath := s.botConfigsPath.Join(filenamePair.Trader)
+	traderFilePath := BotConfigsPath.Join(filenamePair.Trader)
+	fmt.Println("Printing from get_bot_info file: line 74", BotConfigsPath.Unix())
 	var botConfig trader.BotConfig
 	e = config.Read(traderFilePath.Native(), &botConfig)
 	if e != nil {

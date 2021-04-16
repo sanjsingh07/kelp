@@ -31,8 +31,22 @@ func (s *APIServer) listBots(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *APIServer) doListBots() ([]model2.Bot, error) {
+
+	// kos := kelpos.GetKelpOS()
+	// getUserIDvar := GetUserIDfromjwt()
+	// trimmedID := strings.TrimLeft(getUserIDvar, "auth0|")
+	// fmt.Println("from list_bots file: ", trimmedID)
+	// UserIDGlobal = "user_"+trimmedID
+	// dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+	// fmt.Println("Printing from list_bots.go file:", UserIDGlobal)
+	// usersSpecificBot := dataPath.Join(UserIDGlobal)
+	// botConfigsPath := usersSpecificBot.Join("configs")
+	// botLogsPath := usersSpecificBot.Join("logs")
+
+	// s.botConfigsPath = botConfigsPath
 	bots := []model2.Bot{}
-	resultBytes, e := s.kos.Blocking("ls", fmt.Sprintf("ls %s | sort", s.botConfigsPath.Unix()))
+	resultBytes, e := s.kos.Blocking("ls", fmt.Sprintf("ls %s | sort", BotConfigsPath.Unix())) //.unix was already there
+	fmt.Println("Printing from list_bots file: line 48", BotConfigsPath.Unix())
 	if e != nil {
 		return bots, fmt.Errorf("error when listing bots: %s", e)
 	}

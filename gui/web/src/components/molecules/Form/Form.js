@@ -23,12 +23,12 @@ import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import newSecretKey from '../../../kelp-ops-api/newSecretKey';
 import fetchPrice from '../../../kelp-ops-api/fetchPrice';
 import SecretKey from '../SecretKey/SecretKey';
-import deConfig from "../../../delegated_signing_cfg.json";
+import deConfig from "../../../custom_config_ui.json";
 
 const fiatURLPrefix = "http://apilayer.net/api/live?access_key=";
 const fiatURLCurrencyParam = "&currencies=";
 const currencyLayerWebsite = "https://currencylayer.com/";
-const deConfigEnabled = deConfig.delegated_signing_enabled;
+const deConfigEnabled = deConfig.delegated_enabled;
 
 class Form extends Component {
   constructor(props) {

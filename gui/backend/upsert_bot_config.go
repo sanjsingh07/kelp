@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -25,24 +23,6 @@ import (
 	"github.com/stellar/kelp/support/utils"
 	"github.com/stellar/kelp/trader"
 )
-
-type DelegatedConfiguration struct {
-	Delegated_signing_enabled bool	`json:"delegated_signing_enabled"`
-}
-
-var DelConfig DelegatedConfiguration
-
-func init() {
-	absPath, _ := filepath.Abs("../kelp/gui/web/src/delegated_signing_cfg.json")
-	file, _ := os.Open(absPath)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	DelConfig = DelegatedConfiguration{}
-	err := decoder.Decode(&DelConfig)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-}
 
 type upsertBotConfigRequest struct {
 	Name           string                `json:"name"`
@@ -115,7 +95,8 @@ func (s *APIServer) upsertBotConfig(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filenamePair := model2.GetBotFilenames(req.Name, req.Strategy)
-	traderFilePath := s.botConfigsPath.Join(filenamePair.Trader)
+	traderFilePath := BotConfigsPath.Join(filenamePair.Trader)
+	fmt.Println("Printing from upsert_bot_config file: line 99", BotConfigsPath.Unix())
 	botConfig := req.TraderConfig
 	log.Printf("upsert bot config to file: %s\n", traderFilePath.AsString())
 	e = toml.WriteFile(traderFilePath.Native(), &botConfig)
@@ -124,7 +105,8 @@ func (s *APIServer) upsertBotConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	strategyFilePath := s.botConfigsPath.Join(filenamePair.Strategy)
+	strategyFilePath := BotConfigsPath.Join(filenamePair.Strategy)
+	fmt.Println("Printing from upsert_bot_config file: line 109", BotConfigsPath.Unix())
 	strategyConfig := req.StrategyConfig
 	log.Printf("upsert strategy config to file: %s\n", strategyFilePath.AsString())
 	e = toml.WriteFile(strategyFilePath.Native(), &strategyConfig)
@@ -153,7 +135,7 @@ func (s *APIServer) validateConfigs(req upsertBotConfigRequest) *upsertBotConfig
 		hasError = true
 	}
 
-	if !DelConfig.Delegated_signing_enabled {
+	if !CustomConfigVar.DelegatedEnabled {
 		if _, e := strkey.Decode(strkey.VersionByteSeed, req.TraderConfig.TradingKeySeed); e != nil {
 			errResp.TraderConfig.TradingKeySeed = "invalid Trader Secret Key"
 			hasError = true

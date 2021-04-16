@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/png"
@@ -17,6 +16,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"encoding/json"
 
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
@@ -31,6 +31,7 @@ import (
 
 	"github.com/stellar/go/clients/horizonclient"
 	"github.com/stellar/go/support/errors"
+	"github.com/stellar/go/support/config"
 	"github.com/stellar/kelp/gui"
 	"github.com/stellar/kelp/gui/backend"
 	"github.com/stellar/kelp/plugins"
@@ -40,6 +41,7 @@ import (
 	"github.com/stellar/kelp/support/prefs"
 	"github.com/stellar/kelp/support/sdk"
 	"github.com/stellar/kelp/support/utils"
+	"github.com/stellar/kelp/configStruct"
 )
 
 const kelpAssetsPath = "/assets"
@@ -59,10 +61,6 @@ const readyPlaceholder = "READY_STRING"
 const readyStringIndicator = "Serving frontend and API server on HTTP port"
 const downloadCcxtUpdateIntervalLogMillis = 1000
 
-type AuthConfiguration struct {
-	Auth0enabled bool	`json:"auth0enabled"`
-}
-
 type serverInputs struct {
 	port              *uint16
 	dev               *bool
@@ -73,18 +71,24 @@ type serverInputs struct {
 	verbose           *bool
 	noElectron        *bool
 	disablePubnet     *bool
+	customConfig      *string
 }
 
-func init() {
-	absPath, _ := filepath.Abs("../kelp/examples/configs/trader/auth_config.json")
-	file, _ := os.Open(absPath)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	AuthConfiguration := AuthConfiguration{}
-	err := decoder.Decode(&AuthConfiguration)
-	if err != nil {
-		fmt.Println("error:", err)
+// function for reading custom config file and returning config struct with intilized value
+func readCustomConfig(options serverInputs) configStruct.CustomConfigStruct {
+	var customConfigInFunc configStruct.CustomConfigStruct
+	e := config.Read(*options.customConfig, &customConfigInFunc)
+	// utils.CheckConfigError(customConfigInFunc, e, *options.customConfig)
+	if e != nil {
+		fmt.Println(e)
 	}
+	
+	return customConfigInFunc
+}
+// customConfigVar Variable with its equivalent struct #used to inject config values to jwt config var
+var customConfigVar configStruct.CustomConfigStruct
+
+func init() {
 
 	options := serverInputs{}
 	options.port = serverCmd.Flags().Uint16P("port", "p", 8000, "port on which to serve")
@@ -96,6 +100,7 @@ func init() {
 	options.verbose = serverCmd.Flags().BoolP("verbose", "v", false, "enable verbose log lines typically used for debugging")
 	options.noElectron = serverCmd.Flags().Bool("no-electron", false, "open in browser instead of using electron")
 	options.disablePubnet = serverCmd.Flags().Bool("disable-pubnet", false, "disable pubnet option")
+	options.customConfig = serverCmd.Flags().StringP("custom-config", "c", "", "(required) custom config for auth0 and delegated basic config file path")  //custom-config flag
 
 	serverCmd.Run = func(ccmd *cobra.Command, args []string) {
 		isLocalMode := env == envDev
@@ -114,6 +119,28 @@ func init() {
 			}
 		}
 
+		//opening/creating "custom_config_ui" file in ./gui/web/src
+		filePathname, _ := filepath.Abs("../kelp/gui/web/src/" + "custom_config_ui.json")
+		
+		//calliing readCustomConfig func and then inject values into JWT_middleware customconfigvar 
+		customConfigVar = readCustomConfig(options)
+		backend.CustomConfigVar = customConfigVar
+
+		//short var for custom config struct initialzer for UI config file
+		shortVarForUIConfig := configStruct.CustomConfigStruct{
+			Auth0Enabled : customConfigVar.Auth0Enabled,
+			Domain :	   customConfigVar.Domain,
+			ClientId :	   customConfigVar.ClientId,
+			Audience :	   customConfigVar.Audience,
+			DelegatedEnabled :customConfigVar.DelegatedEnabled,
+		}
+
+		// var usersSpecificBot *kelpos.OSPath
+
+		//writing to "custom_config_ui" file in ./gui/web/src
+		file, _ := json.MarshalIndent(shortVarForUIConfig, "", " ")
+		_ = ioutil.WriteFile(filePathname, file, 0644)
+		
 		e = backend.InitBotNameRegex()
 		if e != nil {
 			panic(errors.Wrap(e, "could not init BotNameRegex: "))
@@ -348,14 +375,24 @@ func init() {
 			}
 		}
 
-		dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
-		// usersSpecificBot := dataPath.Jion("user")
-		botConfigsPath := dataPath.Join("configs")
-		botLogsPath := dataPath.Join("logs")
+		// getUserIDvar := backend.GetUserIDfromjwt()
+
+		// trimmedID := strings.TrimLeft(getUserIDvar, "auth0|")
+
+		// fmt.Println("from system amd: ", trimmedID)
+
+		// UserIDGlobal = "user_"+trimmedID
+		// dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+		// fmt.Println("Printing from serveramd file:", UserIDGlobal)
+		// usersSpecificBot := dataPath.Join(UserIDGlobal)
+		// usersSpecificBot = dataPath.Join(trimmedID)
+		// botConfigsPath := usersSpecificBot.Join("configs")
+		// botLogsPath := usersSpecificBot.Join("logs")
 		s, e := backend.MakeAPIServer(
 			kos,
-			botConfigsPath,
-			botLogsPath,
+			// usersSpecificBot,
+			// botConfigsPath,
+			// botLogsPath,
 			*options.horizonTestnetURI,
 			apiTestNet,
 			*options.horizonPubnetURI,
@@ -370,10 +407,10 @@ func init() {
 			panic(e)
 		}
 
-		e = s.InitBackend()
-		if e != nil {
-			panic(e)
-		}
+		// e = s.InitBackend()
+		// if e != nil {
+		// 	panic(e)
+		// }
 
 		guiWebPath := kos.GetBinDir().Join("../gui/web")
 		if isLocalDevMode {
@@ -396,12 +433,11 @@ func init() {
 
 		r := chi.NewRouter()
 		setMiddleware(r)
-		if AuthConfiguration.Auth0enabled {
+		if customConfigVar.Auth0Enabled {
 			backend.SetRoutesWithAuth0(r, s)
 		} else {
 			backend.SetRoutes(r, s)
 		}
-		// backend.SetRoutes(r, s)
 		// gui.FS is automatically compiled based on whether this is a local or deployment build
 		gui.FileServer(r, "/", gui.FS)
 
@@ -582,16 +618,6 @@ func runCcxtBinary(kos *kelpos.KelpOS, ccxtBinPath *kelpos.OSPath) error {
 
 func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPort uint16) {
 
-	absPath, _ := filepath.Abs("../kelp/examples/configs/trader/auth_config.json")
-	file, _ := os.Open(absPath)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	AuthConfiguration := AuthConfiguration{}
-	err := decoder.Decode(&AuthConfiguration)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
 	r := chi.NewRouter()
 	// Add CORS middleware around every request since both ports are different when running server in dev mode
 	r.Use(cors.New(cors.Options{
@@ -599,12 +625,11 @@ func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPo
 	}).Handler)
 
 	setMiddleware(r)
-	if AuthConfiguration.Auth0enabled {
+	if customConfigVar.Auth0Enabled {
 		backend.SetRoutesWithAuth0(r, s)
 	} else {
 		backend.SetRoutes(r, s)
 	}
-	// backend.SetRoutes(r, s)
 	portString := fmt.Sprintf(":%d", devAPIPort)
 	log.Printf("Serving API server on HTTP port: %d\n", devAPIPort)
 	e := http.ListenAndServe(portString, r)

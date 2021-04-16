@@ -3,9 +3,9 @@ import logo from '../../../assets/images/kelp-logo.svg';
 import grid from '../../_styles/grid.module.scss';
 import styles from './Header.module.scss';
 import LogoutButton from '../../screens/LogAuth/LogoutButton';
-import config from "../../../auth_config.json";
+import config from "../../../custom_config_ui.json";
 
-const auth0enabled = config.auth0enabled;
+const auth0enabled = config.auth0_enabled;
 
 class Header extends Component {
   render() {
