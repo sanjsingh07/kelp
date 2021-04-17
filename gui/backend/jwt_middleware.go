@@ -35,6 +35,13 @@ var CustomConfigVar configStruct.CustomConfigStruct
 var userIDfromjwt string
 var UsersSpecificBot, BotConfigsPath, BotLogsPath *kelpos.OSPath
 
+// func init(){
+// 	kos := kelpos.GetKelpOS()
+// 	dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+// 	BotConfigsPath = dataPath.Join("configs")
+// 	BotLogsPath = dataPath.Join("logs")
+// }
+
 func callFromJWTMiddlewareVar() {
 	kos := kelpos.GetKelpOS()
 	trimmedID := strings.TrimLeft(userIDfromjwt, "auth0|")

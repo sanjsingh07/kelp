@@ -373,6 +373,17 @@ func init() {
 			}
 		}
 
+		if(!customConfigVar.Auth0Enabled){
+			dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+			usersSpecificBot := dataPath.Join()
+			botConfigsPath := usersSpecificBot.Join("configs")
+			botLogsPath := usersSpecificBot.Join("logs")
+
+			backend.UsersSpecificBot = usersSpecificBot
+			backend.BotConfigsPath = botConfigsPath
+			backend.BotLogsPath = botLogsPath
+
+		}
 		// dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
 		// usersSpecificBot := dataPath.Join("user_id_goes_here")
 		// botConfigsPath := usersSpecificBot.Join("configs")
