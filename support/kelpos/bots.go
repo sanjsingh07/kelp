@@ -41,13 +41,13 @@ func (kos *KelpOS) registerBotWithState(bot *model2.Bot, state BotState, forceRe
 	kos.botLock.Lock()
 	defer kos.botLock.Unlock()
 
-	_, exists := kos.bots[bot.Name]
-	if exists {
-		if !forceRegister {
-			return fmt.Errorf("bot '%s' already registered", bot.Name)
-		}
-		log.Printf("bot '%s' already registered, but re-registering with state '%s' because forceRegister was set", bot.Name, state)
-	}
+	// _, exists := kos.bots[bot.Name]
+	// if exists {
+	// 	if !forceRegister {
+	// 		return fmt.Errorf("bot '%s' already registered", bot.Name)
+	// 	}
+	// 	log.Printf("bot '%s' already registered, but re-registering with state '%s' because forceRegister was set", bot.Name, state)
+	// }
 
 	kos.bots[bot.Name] = &BotInstance{
 		Bot:   bot,

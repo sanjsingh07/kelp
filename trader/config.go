@@ -1,34 +1,13 @@
 package trader
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
 
 	hProtocol "github.com/stellar/go/protocols/horizon"
 	"github.com/stellar/kelp/support/postgresdb"
 	"github.com/stellar/kelp/support/toml"
 	"github.com/stellar/kelp/support/utils"
 )
-
-type DelegatedConfiguration struct {
-	delegated_signing_enabled bool	`json:"delegated_signing_enabled"`
-}
-
-var DelConfig DelegatedConfiguration
-
-func init() {
-	absPath, _ := filepath.Abs("../kelp/gui/web/src/delegated_signing_cfg.json")
-	file, _ := os.Open(absPath)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	DelConfig = DelegatedConfiguration{}
-	err := decoder.Decode(&DelConfig)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-}
 
 // XLM is a constant for XLM
 const XLM = "XLM"
@@ -224,9 +203,7 @@ func (b *BotConfig) Init() error {
 	}
 	b.assetQuote = *asset
 
-	if !DelConfig.delegated_signing_enabled {
-		b.tradingAccount, e = utils.ParseSecret(b.TradingKeySeed)
-	}
+	b.tradingAccount, e = utils.ParseSecret(b.TradingKeySeed)
 
 	if e != nil {
 		return e
