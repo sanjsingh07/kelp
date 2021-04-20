@@ -7,7 +7,10 @@ import (
 	"github.com/stellar/kelp/support/postgresdb"
 	"github.com/stellar/kelp/support/toml"
 	"github.com/stellar/kelp/support/utils"
+	"github.com/stellar/kelp/configStruct"
 )
+
+var customConfigVar configStruct.CustomConfigStruct
 
 // XLM is a constant for XLM
 const XLM = "XLM"
@@ -203,10 +206,11 @@ func (b *BotConfig) Init() error {
 	}
 	b.assetQuote = *asset
 
-	b.tradingAccount, e = utils.ParseSecret(b.TradingKeySeed)
-
-	if e != nil {
-		return e
+	if(!customConfigVar.DelegatedEnabled){
+		b.tradingAccount, e = utils.ParseSecret(b.TradingKeySeed)
+		if e != nil {
+			return e
+		}
 	}
 	if b.tradingAccount == nil {
 		return fmt.Errorf("no trading account specified")

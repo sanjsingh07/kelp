@@ -545,10 +545,10 @@ class Form extends Component {
                     <SecretKey
                       label="Trader account secret key"
                       isTestNet={isTestNet}
-                      secret={this.props.configData.trader_config.trading_secret_seed}
-                      onSecretChange={(event) => { this.props.onChange("trader_config.trading_secret_seed", event) }}
-                      onError={() => this.getError("trader_config.trading_secret_seed")}
-                      onNewKeyClick={() => this.newSecret("trader_config.trading_secret_seed")}
+                      secret={this.props.configData.trader_config.trading_key_seed}
+                      onSecretChange={(event) => { this.props.onChange("trader_config.trading_key_seed", event) }}
+                      onError={() => this.getError("trader_config.trading_key_seed")}
+                      onNewKeyClick={() => this.newSecret("trader_config.trading_key_seed")}
                       readOnly={this.props.readOnly}
                       eventPrefix={this.props.eventPrefix + "-secretkey-trader"}
                     />
