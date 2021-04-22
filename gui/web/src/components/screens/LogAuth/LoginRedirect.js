@@ -18,19 +18,25 @@ const LoginRedirect = () => {
     return loginWithRedirect();
   }
 
-  try {
-    const accessToken = getAccessTokenSilently();
-    accessToken.then(function(result) {
-      localStorage.setItem("accessToken", result);
-      console.log("print not await func")
-      window.location.reload();
-    })
-    if (isLoading) {
-      return <></>;
-    }
-  } catch (e) {
-    console.log(e.message);
+  if (isLoading) {
+    return <></>;
   }
+
+  useEffect(() => {
+    const getaccesstoken = async () => {
+      try {
+        const accessToken = await getAccessTokenSilently();
+        localStorage.setItem("accessToken", accessToken);
+        if (isLoading) {
+          return <></>;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    };
+  
+    getaccesstoken();
+  }, []);
 
   // try{
   //     const accessToken =  getAccessTokenSilently();
@@ -74,10 +80,6 @@ const LoginRedirect = () => {
 
   //   return <Redirect to={{pathname: '/home'}}/>;
   // }
-
-  if (isLoading) {
-    return <></>;
-  }
 
   // try {
   //   const accessToken = await getAccessTokenSilently();
@@ -123,8 +125,6 @@ const LoginRedirect = () => {
   return (
     <></>
   );
-
-  // return loginWithRedirect();
 };
 
 export default LoginRedirect;

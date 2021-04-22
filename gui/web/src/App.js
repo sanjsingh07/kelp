@@ -11,7 +11,7 @@ import quit from './kelp-ops-api/quit';
 import fetchKelpErrors from './kelp-ops-api/fetchKelpErrors';
 import removeKelpErrors from './kelp-ops-api/removeKelpErrors';
 import Welcome from './components/molecules/Welcome/Welcome';
-import LoginRedirect from './components/screens/LogAuth/LoginRedirect';
+import LoginRedirect  from './components/screens/LogAuth/LoginRedirect';
 import { interceptor } from './kelp-ops-api/interceptor';
 
 let baseUrl = function () {

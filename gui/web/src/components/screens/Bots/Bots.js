@@ -10,7 +10,7 @@ import listBots from '../../../kelp-ops-api/listBots';
 import Constants from '../../../Constants';
 import Modal from '../../molecules/Modal/Modal';
 // import { withAuthenticationRequired } from "@auth0/auth0-react";
-// import config from "../../../custom_config_ui.json";
+import config from "../../../custom_config_ui.json";
 
 
 class Bots extends Component {

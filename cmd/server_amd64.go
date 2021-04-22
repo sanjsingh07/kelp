@@ -700,14 +700,35 @@ func writeTrayIcon(kos *kelpos.KelpOS, trayIconPath *kelpos.OSPath, assetsDirPat
 	return nil
 }
 
-func openBrowser(url string, openBrowserWg *sync.WaitGroup) {
-	log.Printf("opening URL in native browser: %s", url)
-	openBrowserWg.Wait()
+// func openBrowser(url string, openBrowserWg *sync.WaitGroup) {
+// 	log.Printf("opening URL in native browser: %s", url)
+// 	openBrowserWg.Wait()
 
-	e := browser.OpenURL(url)
-	if e != nil {
-		log.Fatal(e)
+// 	e := browser.OpenURL(url)
+// 	if e != nil {
+// 		log.Fatal(e)
+// 	}
+// }
+
+func openBrowser(url string, openBrowserWg *sync.WaitGroup) {
+
+	if runtime.GOOS == "linux" {
+		_, err := exec.LookPath("xdg-open")
+		if err != nil {
+			log.Printf("please open your browser at url: %s", url)
+			//return nil
+		}
+	} else {
+
+		log.Printf("opening URL in native browser: %s", url)
+		openBrowserWg.Wait()
+
+		e := browser.OpenURL(url)
+		if e != nil {
+			log.Fatal(e)
+		}
 	}
+
 }
 
 func openElectron(trayIconPath *kelpos.OSPath, url string) {
