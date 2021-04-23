@@ -100,7 +100,7 @@ func init() {
 	options.verbose = serverCmd.Flags().BoolP("verbose", "v", false, "enable verbose log lines typically used for debugging")
 	options.noElectron = serverCmd.Flags().Bool("no-electron", false, "open in browser instead of using electron")
 	options.disablePubnet = serverCmd.Flags().Bool("disable-pubnet", false, "disable pubnet option")
-	options.customConfig = serverCmd.Flags().StringP("custom-config", "c", "", "(required) custom config for auth0 and delegated basic config file path")  //custom-config flag
+	options.customConfig = serverCmd.Flags().StringP("custom-config", "c", "", "custom config for auth0 and delegated basic config file path")  //custom-config flag
 
 	serverCmd.Run = func(ccmd *cobra.Command, args []string) {
 		isLocalMode := env == envDev

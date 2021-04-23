@@ -245,8 +245,4 @@ class NewBot extends Component {
   }
 }
 
-// const customExportNewBot = auth0enabled ? withAuthenticationRequired(NewBot) : NewBot;
 export default NewBot;
-// export default withAuthenticationRequired(NewBot, {
-//   onRedirecting: () => <div> Loading... </div>
-// });
