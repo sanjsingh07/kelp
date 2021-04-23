@@ -2,9 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kelp-config
-  namespace: kelp
   labels:
-    app: kelp
+    app: kelp-dev
 data:
   custom_config.cfg: |
     # Sample custom config file for the kelp bot

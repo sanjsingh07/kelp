@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: kelp-dev
-        image: sanjsingh07/kelp:dev
+        image: sanjsingh07/kelp-dev
         command:
           - ./bin/kelp server -p 8000 --no-electron -c /kelp-config/custom_config.cfg
         ports:
