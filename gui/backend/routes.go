@@ -57,7 +57,7 @@ func SetRoutesWithAuth0(r *chi.Mux, s *APIServer) {
 		r.Post("/fetchPrice", http.HandlerFunc(s.fetchPrice))
 		r.Post("/upsertBotConfig", http.HandlerFunc(s.upsertBotConfig))
 		r.Post("/sendMetricEvent", http.HandlerFunc(s.sendMetricEvent))
-		// r.Post("/delegatedSigningCallback", http.HandlerFunc(s.delegatedSigningCallback))
+		// r.Post("/delegatedSigningCallback", http.HandlerFunc(s.signedCallback))
 	})
 	r.Get("/ping", http.HandlerFunc(s.ping))
 }

@@ -124,7 +124,8 @@ func init() {
 		
 		//calliing readCustomConfig func and then inject values into JWT_middleware customconfigvar 
 		customConfigVar = readCustomConfig(options)
-		backend.CustomConfigVar = customConfigVar
+		backend.CustomConfigVarJWT = customConfigVar
+		plugins.CustomConfigVarPlugins = customConfigVar
 
 		//short var for custom config struct initialzer for UI config file
 		shortVarForUIConfig := configStruct.CustomConfigStruct{

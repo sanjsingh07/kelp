@@ -30,17 +30,10 @@ type JSONWebKeys struct {
 	X5c []string `json:"x5c"`
 }
 
-var CustomConfigVar configStruct.CustomConfigStruct
+var CustomConfigVarJWT configStruct.CustomConfigStruct
 
 var userIDfromjwt string
 var UsersSpecificBot, BotConfigsPath, BotLogsPath *kelpos.OSPath
-
-// func init(){
-// 	kos := kelpos.GetKelpOS()
-// 	dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
-// 	BotConfigsPath = dataPath.Join("configs")
-// 	BotLogsPath = dataPath.Join("logs")
-// }
 
 func callFromJWTMiddlewareVar() {
 	kos := kelpos.GetKelpOS()
@@ -59,20 +52,20 @@ func callFromJWTMiddlewareVar() {
 var JWTMiddlewareVar = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 		// Verify 'iss' claim
-		iss := "https://" + CustomConfigVar.Domain + "/"
+		iss := "https://" + CustomConfigVarJWT.Domain + "/"
 		checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
 		if !checkIss {
 			return token, errors.New("Invalid issuer.")
 		}
 
 		// Verify 'aud' claim
-		// audPass := CustomConfigVar.Audience
+		// audPass := CustomConfigVarJWT.Audience
 		// checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(audPass, false)
 		// if !checkAud {
 		// 	return token, errors.New("Invalid audience.")
 		// }
 
-		// fmt.Println("IM PRINTING FROM JWT RIGHT HERE: ", CustomConfigVar.Domain)
+		// fmt.Println("IM PRINTING FROM JWT RIGHT HERE: ", CustomConfigVarJWT.Domain)
 		// fmt.Println(token.Claims.(jwt.MapClaims)["aud"])
 		// fmt.Println(token.Claims.(jwt.MapClaims)["sub"])
 		// fmt.Printf("aud1st = %T\n", token.Claims.(jwt.MapClaims)["aud"])
@@ -99,7 +92,7 @@ var JWTMiddlewareVar = jwtmiddleware.New(jwtmiddleware.Options{
 
 func getPemCert(token *jwt.Token) (string, error) {
 	cert := ""
-	resp, err := http.Get("https://" + CustomConfigVar.Domain + "/.well-known/jwks.json")
+	resp, err := http.Get("https://" + CustomConfigVarJWT.Domain + "/.well-known/jwks.json")
 
 	if err != nil {
 		return cert, err

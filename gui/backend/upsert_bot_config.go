@@ -133,7 +133,7 @@ func (s *APIServer) validateConfigs(req upsertBotConfigRequest) *upsertBotConfig
 		hasError = true
 	}
 
-	if !CustomConfigVar.DelegatedEnabled {
+	if !CustomConfigVarJWT.DelegatedEnabled {
 		if _, e := strkey.Decode(strkey.VersionByteSeed, req.TraderConfig.TradingKeySeed); e != nil {
 			errResp.TraderConfig.TradingKeySeed = "invalid Trader Secret Key"
 			hasError = true
