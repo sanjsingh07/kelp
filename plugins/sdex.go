@@ -407,11 +407,14 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 
 	//Sanjay: implement new method for delegated signing
 	// convert to xdr string for delegated signing
-	// if(CustomConfigVarPlugins.DelegatedEnabled){
-	// 	// txeB64, e := sdex.deligatedSign(tx)
-	// 	sdex.deligatedSign(tx)
-	// 	return nil
-	// }
+	fmt.Println("Printing from sdex line 410",CustomConfigVarPlugins.DelegatedEnabled)
+	CustomConfigVarPlugins.DelegatedEnabled = true
+	if(CustomConfigVarPlugins.DelegatedEnabled){
+		fmt.Println("Printing from sdex line 413",CustomConfigVarPlugins.DelegatedEnabled)
+		// txeB64, e := sdex.deligatedSign(tx)
+		sdex.deligatedSign(tx)
+		return nil
+	}
 
 
 	txEnve, e := tx.TxEnvelope()
@@ -425,7 +428,7 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 	fmt.Println("tx with Base64: \n", txBase64)
 
 
-	sdex.deligatedSign(tx)
+	// sdex.deligatedSign(tx)
 
 	// log.Printf("Source Account/trader account: %s\n", sdex.SourceAccount)
 	// log.Printf("Source Account/trader account: %s\n", txEnve.SourceAccount)
@@ -444,31 +447,31 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 
 
 	// convert to xdr string
-	// txeB64, e := sdex.sign(tx)
+	txeB64, e := sdex.sign(tx)
 
-	// if e != nil {
-	// 	return e
-	// }
-	// log.Printf("tx XDR: %s\n", txeB64)
+	if e != nil {
+		return e
+	}
+	log.Printf("tx XDR: %s\n", txeB64)
 
-	// // submit
-	// if !sdex.simMode {
-	// 	if asyncMode {
-	// 		log.Println("submitting tx XDR to network (async)")
-	// 		e = sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
-	// 			sdex.submit(txeB64, asyncCallback, true)
-	// 		}, nil)
-	// 		if e != nil {
-	// 			return fmt.Errorf("unable to trigger goroutine to submit tx XDR to network asynchronously: %s", e)
-	// 		}
-	// 	} else {
-	// 		log.Println("submitting tx XDR to network (synch)")
-	// 		sdex.submit(txeB64, asyncCallback, false)
-	// 	}
-	// } else {
-	// 	log.Println("not submitting tx XDR to network in simulation mode, calling asyncCallback with empty hash value")
-	// 	sdex.invokeAsyncCallback(asyncCallback, "", nil, asyncMode)
-	// }
+	// submit
+	if !sdex.simMode {
+		if asyncMode {
+			log.Println("submitting tx XDR to network (async)")
+			e = sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
+				sdex.submit(txeB64, asyncCallback, true)
+			}, nil)
+			if e != nil {
+				return fmt.Errorf("unable to trigger goroutine to submit tx XDR to network asynchronously: %s", e)
+			}
+		} else {
+			log.Println("submitting tx XDR to network (synch)")
+			sdex.submit(txeB64, asyncCallback, false)
+		}
+	} else {
+		log.Println("not submitting tx XDR to network in simulation mode, calling asyncCallback with empty hash value")
+		sdex.invokeAsyncCallback(asyncCallback, "", nil, asyncMode)
+	}
 	return nil
 }
 
@@ -502,8 +505,12 @@ func (sdex *SDEX) deligatedSign(tx *txnbuild.Transaction) (error) {
 		return err
 	}
 	txB64URLEnc := url.QueryEscape(txBase64) //encoding with url Encoder
+
+	callback := "http://f23d6e012476.ngrok.io/api/v1/signedCallback"
+	callbackEnc := url.QueryEscape(callback) //encoding with url Encoder
+
 	pubkey := string(sdex.SourceAccount)
-	URI := func(xdrBase64 string, pubkey string) string { return fmt.Sprintf("web+stellar:tx?xdr=%s&pubkey=%s", txB64URLEnc, pubkey) }
+	URI := func(xdrBase64 string, pubkey string) string { return fmt.Sprintf("web+stellar:tx?xdr=%s&callback=%s&pubkey=%s", txB64URLEnc, callbackEnc, pubkey) }
 	valueForJsonString := URI(txBase64, pubkey)
 
 	values := map[string]string{"uri": valueForJsonString}
@@ -522,16 +529,24 @@ func (sdex *SDEX) deligatedSign(tx *txnbuild.Transaction) (error) {
     }
 
     var res map[string]interface{}
+    fmt.Println(resp)
     json.NewDecoder(resp.Body).Decode(&res)
+    fmt.Println(res)
     fmt.Println(res["json"])
 
 	return nil
 }
 
-// func SubmitDelegatedTX(txeB64 string)(){
-// 	submitDelegatedTX(txeB64, func(hash string, e error), true)
-// 	return nil
-// }
+func (sdex *SDEX) SubmitDelegatedTX(txeB64 string){
+	resp, e := sdex.API.SubmitTransactionXDR(txeB64)
+	if e != nil {
+		log.Printf(" error: While Submitting Tx: %s\n", e)
+		return 
+	}
+	log.Printf(" Resp of Submitting Tx: %s\n", resp)
+	// submitDelegatedTX(txeB64, func(hash string, e error), true)
+	// return nil
+}
 
 // func (sdex *SDEX) submitDelegatedTX(txeB64 string, asyncCallback func(hash string, e error), asyncMode bool) error {
 // 	var e error
