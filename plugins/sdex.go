@@ -412,7 +412,7 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 	if(CustomConfigVarPlugins.DelegatedEnabled){
 		fmt.Println("Printing from sdex line 413",CustomConfigVarPlugins.DelegatedEnabled)
 		// txeB64, e := sdex.deligatedSign(tx)
-		sdex.deligatedSign(tx)
+		sdex.delegatedSign(tx)
 		return nil
 	}
 
@@ -428,7 +428,7 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 	fmt.Println("tx with Base64: \n", txBase64)
 
 
-	// sdex.deligatedSign(tx)
+	// sdex.delegatedSign(tx)
 
 	// log.Printf("Source Account/trader account: %s\n", sdex.SourceAccount)
 	// log.Printf("Source Account/trader account: %s\n", txEnve.SourceAccount)
@@ -495,7 +495,7 @@ func (sdex *SDEX) sign(tx *txnbuild.Transaction) (string, error) {
 }
 
 // Added by Sanjay to impplement deligated signing
-func (sdex *SDEX) deligatedSign(tx *txnbuild.Transaction) (error) {
+func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
 	var e error
 	if e != nil {
 		return e
@@ -506,7 +506,8 @@ func (sdex *SDEX) deligatedSign(tx *txnbuild.Transaction) (error) {
 	}
 	txB64URLEnc := url.QueryEscape(txBase64) //encoding with url Encoder
 
-	callback := "http://f23d6e012476.ngrok.io/api/v1/signedCallback"
+	callback := "https://4b6bab21cbd0.ngrok.io/api/v1/signedCallback"//CustomConfigVarPlugins.DelegatedSigningUrl //
+	fmt.Println(callback)
 	callbackEnc := url.QueryEscape(callback) //encoding with url Encoder
 
 	pubkey := string(sdex.SourceAccount)
@@ -537,38 +538,40 @@ func (sdex *SDEX) deligatedSign(tx *txnbuild.Transaction) (error) {
 	return nil
 }
 
-func (sdex *SDEX) SubmitDelegatedTX(txeB64 string){
-	resp, e := sdex.API.SubmitTransactionXDR(txeB64)
+func SubmitDelegatedTX(txeB64 string /*, asyncCallback func(hash string, e error), asyncMode bool */) /*error*/ {
+	fmt.Println("this is getting called from SDEX.go \n", txeB64)
+	var sdexStruct *SDEX
+	resp, e := sdexStruct.API.SubmitTransactionXDR(txeB64)
+	fmt.Println("is this even Printing")
+	// resp, e := sdex.API.SubmitTransactionXDR(txeB64)
 	if e != nil {
 		log.Printf(" error: While Submitting Tx: %s\n", e)
 		return 
 	}
 	log.Printf(" Resp of Submitting Tx: %s\n", resp)
-	// submitDelegatedTX(txeB64, func(hash string, e error), true)
+	fmt.Println(" Resp of Submitting Tx: \n", resp)
+	return
+
+	// var e error
+	// if !sdex.simMode {
+	// 	if asyncMode {
+	// 		log.Println("submitting tx XDR to network (async)")
+	// 		e = sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
+	// 			sdex.submit(txeB64, asyncCallback, true)
+	// 		}, nil)
+	// 		if e != nil {
+	// 			return fmt.Errorf("unable to trigger goroutine to submit tx XDR to network asynchronously: %s", e)
+	// 		}
+	// 	} else {
+	// 		log.Println("submitting tx XDR to network (synch)")
+	// 		sdex.submit(txeB64, asyncCallback, false)
+	// 	}
+	// } else {
+	// 	log.Println("not submitting tx XDR to network in simulation mode, calling asyncCallback with empty hash value")
+	// 	sdex.invokeAsyncCallback(asyncCallback, "", nil, asyncMode)
+	// }
 	// return nil
 }
-
-// func (sdex *SDEX) submitDelegatedTX(txeB64 string, asyncCallback func(hash string, e error), asyncMode bool) error {
-// 	var e error
-// 	if !sdex.simMode {
-// 		if asyncMode {
-// 			log.Println("submitting tx XDR to network (async)")
-// 			e = sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
-// 				sdex.submit(txeB64, asyncCallback, true)
-// 			}, nil)
-// 			if e != nil {
-// 				return fmt.Errorf("unable to trigger goroutine to submit tx XDR to network asynchronously: %s", e)
-// 			}
-// 		} else {
-// 			log.Println("submitting tx XDR to network (synch)")
-// 			sdex.submit(txeB64, asyncCallback, false)
-// 		}
-// 	} else {
-// 		log.Println("not submitting tx XDR to network in simulation mode, calling asyncCallback with empty hash value")
-// 		sdex.invokeAsyncCallback(asyncCallback, "", nil, asyncMode)
-// 	}
-// 	return nil
-// }
 
 func (sdex *SDEX) submit(txeB64 string, asyncCallback func(hash string, e error), asyncMode bool) {
 	resp, e := sdex.API.SubmitTransactionXDR(txeB64)
