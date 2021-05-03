@@ -408,6 +408,8 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 	//Sanjay: implement new method for delegated signing
 	// convert to xdr string for delegated signing
 	fmt.Println("Printing from sdex line 410",CustomConfigVarPlugins.DelegatedEnabled)
+	fmt.Println("async function: \n", asyncCallback)
+	fmt.Println("async mode: \n", asyncMode)
 	CustomConfigVarPlugins.DelegatedEnabled = true
 	if(CustomConfigVarPlugins.DelegatedEnabled){
 		fmt.Println("Printing from sdex line 413",CustomConfigVarPlugins.DelegatedEnabled)
@@ -417,16 +419,15 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 	}
 
 
-	txEnve, e := tx.TxEnvelope()
-	log.Printf("tx XDR b4 signing: %s\n", txEnve)
-	fmt.Println("tx XDR b4 signing: \n", txEnve)
+	// txEnve, e := tx.TxEnvelope()
+	// log.Printf("tx XDR b4 signing: %s\n", txEnve)
+	// fmt.Println("tx XDR b4 signing: \n", txEnve)
 
 	// txEnveBase, e := txEnve.Base64()
 	// log.Printf("tx XDR b4 signing with Base64: %s\n", txEnveBase)
-	txBase64, e := tx.Base64()
-	log.Printf("tx with Base64: %s\n", txBase64)
-	fmt.Println("tx with Base64: \n", txBase64)
-
+	// txBase64, e := tx.Base64()
+	// log.Printf("tx with Base64: %s\n", txBase64)
+	// fmt.Println("tx with Base64: \n", txBase64)
 
 	// sdex.delegatedSign(tx)
 
@@ -506,7 +507,7 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
 	}
 	txB64URLEnc := url.QueryEscape(txBase64) //encoding with url Encoder
 
-	callback := "https://4b6bab21cbd0.ngrok.io/api/v1/signedCallback"//CustomConfigVarPlugins.DelegatedSigningUrl //
+	callback := "https://167223ca0ca2.ngrok.io/api/v1/signedCallback"//CustomConfigVarPlugins.DelegatedSigningUrl //
 	fmt.Println(callback)
 	callbackEnc := url.QueryEscape(callback) //encoding with url Encoder
 
@@ -538,10 +539,16 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
 	return nil
 }
 
+// func SubmitDelegatedTX(txeB64 string){
+// 	var sdexStruct SDEX
+// 	sdexStruct.submitDelegatedTX(txeB64)
+// }
+
 func SubmitDelegatedTX(txeB64 string /*, asyncCallback func(hash string, e error), asyncMode bool */) /*error*/ {
+	// var sdexStruct SDEX
+	var horizonVar *horizonclient.Client
 	fmt.Println("this is getting called from SDEX.go \n", txeB64)
-	var sdexStruct *SDEX
-	resp, e := sdexStruct.API.SubmitTransactionXDR(txeB64)
+	resp, e := horizonVar.SubmitTransactionXDR(txeB64)
 	fmt.Println("is this even Printing")
 	// resp, e := sdex.API.SubmitTransactionXDR(txeB64)
 	if e != nil {
