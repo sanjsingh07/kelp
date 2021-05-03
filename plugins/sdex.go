@@ -29,6 +29,7 @@ import (
 )
 
 var CustomConfigVarPlugins configStruct.CustomConfigStruct
+var HorizonURLForDelSigning string
 const baseReserve = 0.5
 const baseFee = 0.0000100
 const maxLumenTrust = math.MaxFloat64
@@ -407,13 +408,14 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 
 	//Sanjay: implement new method for delegated signing
 	// convert to xdr string for delegated signing
-	fmt.Println("Printing from sdex line 410",CustomConfigVarPlugins.DelegatedEnabled)
-	fmt.Println("async function: \n", asyncCallback)
-	fmt.Println("async mode: \n", asyncMode)
-	CustomConfigVarPlugins.DelegatedEnabled = true
+	// fmt.Println("Printing from sdex line 410",CustomConfigVarPlugins.DelegatedEnabled)
+	// fmt.Println("async function: \n", asyncCallback)
+	// fmt.Println("async mode: \n", asyncMode)
+	// CustomConfigVarPlugins.DelegatedEnabled = true
 	if(CustomConfigVarPlugins.DelegatedEnabled){
-		fmt.Println("Printing from sdex line 413",CustomConfigVarPlugins.DelegatedEnabled)
+		// fmt.Println("Printing from sdex line 413",CustomConfigVarPlugins.DelegatedEnabled)
 		// txeB64, e := sdex.deligatedSign(tx)
+		// fmt.Println("delegatedEnabledDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD \n")
 		sdex.delegatedSign(tx)
 		return nil
 	}
@@ -507,8 +509,7 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
 	}
 	txB64URLEnc := url.QueryEscape(txBase64) //encoding with url Encoder
 
-	callback := "https://167223ca0ca2.ngrok.io/api/v1/signedCallback"//CustomConfigVarPlugins.DelegatedSigningUrl //
-	fmt.Println(callback)
+	callback := CustomConfigVarPlugins.Callback //
 	callbackEnc := url.QueryEscape(callback) //encoding with url Encoder
 
 	pubkey := string(sdex.SourceAccount)
@@ -523,7 +524,7 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
 
 	//Invoke Orunpay API
 
-    resp, err := http.Post("https://orunpay-api.herokuapp.com/v1/transactions/sep0007", "application/json",
+    resp, err := http.Post(CustomConfigVarPlugins.DelegatedSigningUrl, "application/json",
         bytes.NewBuffer(json_data))
 
     if err != nil {
@@ -546,9 +547,17 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
 
 func SubmitDelegatedTX(txeB64 string /*, asyncCallback func(hash string, e error), asyncMode bool */) /*error*/ {
 	// var sdexStruct SDEX
-	var horizonVar *horizonclient.Client
+	// var horizonVar *horizonclient.Client
 	fmt.Println("this is getting called from SDEX.go \n", txeB64)
-	resp, e := horizonVar.SubmitTransactionXDR(txeB64)
+
+	horizonclientVar := &horizonclient.Client{
+		HorizonURL: HorizonURLForDelSigning,
+		HTTP:       http.DefaultClient,
+	}
+
+	fmt.Println(HorizonURLForDelSigning)
+
+	resp, e := horizonclientVar.SubmitTransactionXDR(txeB64)
 	fmt.Println("is this even Printing")
 	// resp, e := sdex.API.SubmitTransactionXDR(txeB64)
 	if e != nil {

@@ -42,6 +42,7 @@ import (
 	"github.com/stellar/kelp/support/sdk"
 	"github.com/stellar/kelp/support/utils"
 	"github.com/stellar/kelp/configStruct"
+	"github.com/stellar/kelp/support/toml"
 )
 
 const kelpAssetsPath = "/assets"
@@ -82,7 +83,6 @@ func readCustomConfig(options serverInputs) configStruct.CustomConfigStruct {
 	if e != nil {
 		fmt.Println(e)
 	}
-	
 	return customConfigInFunc
 }
 // customConfigVar Variable with its equivalent struct #used to inject config values to jwt config var
@@ -379,6 +379,16 @@ func init() {
 			usersSpecificBot := dataPath.Join()
 			botConfigsPath := usersSpecificBot.Join("configs")
 			botLogsPath := usersSpecificBot.Join("logs")
+			traderFilePath := usersSpecificBot.Join("custom_config.cfg")
+			// if e != nil {
+			// 	log.Printf("error creating custom_config.cfg: %s\n", e)
+			// }
+			e := toml.WriteFile(traderFilePath.Native(), &customConfigVar)
+			if e != nil {
+				log.Printf("error writing Custom Config toml file: %s\n", e)
+				return
+			}
+		
 
 			backend.UsersSpecificBot = usersSpecificBot
 			backend.BotConfigsPath = botConfigsPath

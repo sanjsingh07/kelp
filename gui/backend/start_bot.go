@@ -104,11 +104,20 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 		return fmt.Errorf("cannnot start pubnet bots when pubnet is disabled")
 	}
 
-	command := fmt.Sprintf("trade -c %s -s %s -f %s -l %s --ui",
+	// if(CustomConfigVarJWT.DELEGATED_ENABLED){//add below code snippet here} will need if wanna precise and dont wanna 'read custom config/pass custom config'
+	//custom config file path:
+	customConfigRelativePath, e :=	BotConfigsPath.Join("custom_config.cfg").RelFromPath(s.kos.GetDotKelpWorkingDir())
+	if e != nil {
+		return fmt.Errorf("unable to get relative path of custom config path from basepath: %s", e)
+	}
+	// fmt.Println(customConfigPath)
+
+	command := fmt.Sprintf("trade -c %s -s %s -f %s -l %s -x %s --ui",
 		traderRelativeConfigPath.Unix(),
 		strategy,
 		stratRelativeConfigPath.Unix(),
 		logRelativePrefixPath.Unix(),
+		customConfigRelativePath.Unix(),
 	)
 	if iterations != nil {
 		command = fmt.Sprintf("%s --iter %d", command, *iterations)

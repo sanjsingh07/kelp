@@ -6,11 +6,13 @@ import (
 	// "fmt"
 	"net/http"
 	"strings"
+	"log"
 
 	"github.com/auth0/go-jwt-middleware"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/stellar/kelp/configStruct"
 	"github.com/stellar/kelp/support/kelpos"
+	"github.com/stellar/kelp/support/toml"
 )
 
 type Response struct {
@@ -43,6 +45,15 @@ func callFromJWTMiddlewareVar() {
 	dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
 
 	UsersSpecificBot = dataPath.Join(UserIDGlobal)
+	traderFilePath := UsersSpecificBot.Join("custom_config.cfg")
+	// if e != nil {
+	// 	log.Printf("error creating custom_config.cfg: %s\n", e)
+	// }
+	e := toml.WriteFile(traderFilePath.Native(), &CustomConfigVarJWT)
+	if e != nil {
+		log.Printf("error writing Custom Config toml file: %s\n", e)
+		return
+	}
 	BotConfigsPath = UsersSpecificBot.Join("configs")
 	BotLogsPath = UsersSpecificBot.Join("logs")
 }

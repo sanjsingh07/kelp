@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"fmt"
-	"log"
+	// "log"
 	"io/ioutil"
 	"strings"
 	// "encoding/json"
@@ -21,7 +21,6 @@ import (
 // }
 
 func (s *APIServer) /*(t *delegatedSignSubmit)*/ signedCallback(w http.ResponseWriter, r *http.Request) {
-	// var exchangeShim api.ExchangeShim
 	signedTXBODY, e := ioutil.ReadAll(r.Body)
 	if e != nil {
 		s.writeErrorJson(w, fmt.Sprintf("error when reading request input: %s\n", e))
@@ -39,7 +38,7 @@ func (s *APIServer) /*(t *delegatedSignSubmit)*/ signedCallback(w http.ResponseW
 		return
 	}
 
-	log.Printf("signedXDR only line 28: %s\n", decodedXDR)
+	// log.Printf("signedXDR only line 28: %s\n", decodedXDR)
 	
 
 	/*var signedURIStruct SignedURIStruct

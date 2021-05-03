@@ -32,6 +32,7 @@ import (
 	"github.com/stellar/kelp/support/sdk"
 	"github.com/stellar/kelp/support/utils"
 	"github.com/stellar/kelp/trader"
+	"github.com/stellar/kelp/configStruct" //stuct detail for custom config
 )
 
 var upgradeScripts = []*database.UpgradeScript{
@@ -108,6 +109,7 @@ type inputs struct {
 	ui                            *bool
 	cpuProfile                    *string
 	memProfile                    *string
+	customConfig      			  *string
 }
 
 func validateCliParams(l logger.Logger, options inputs) {
@@ -170,6 +172,7 @@ func init() {
 	options.ui = tradeCmd.Flags().Bool("ui", false, "indicates a bot that is started from the Kelp UI server")
 	options.cpuProfile = tradeCmd.Flags().String("cpuprofile", "", "write cpu profile to `file`")
 	options.memProfile = tradeCmd.Flags().String("memprofile", "", "write memory profile to `file`")
+	options.customConfig = tradeCmd.Flags().StringP("custom-config", "x", "", "custom config for auth0 and delegated basic config file path")  //custom-config flag
 
 	requiredFlag("botConf")
 	requiredFlag("strategy")
@@ -241,6 +244,16 @@ func makeFeeFn(l logger.Logger, botConfig trader.BotConfig, newClient *horizoncl
 		logger.Fatal(l, fmt.Errorf("could not set up feeFn correctly: %s", e))
 	}
 	return feeFn
+}
+
+func readCustomConfigTrade(options inputs) configStruct.CustomConfigStruct {
+	var customConfigInFunc configStruct.CustomConfigStruct
+	e := config.Read(*options.customConfig, &customConfigInFunc)
+	// utils.CheckConfigError(customConfigInFunc, e, *options.customConfig)
+	if e != nil {
+		fmt.Println(e)
+	}
+	return customConfigInFunc
 }
 
 func readBotConfig(l logger.Logger, options inputs, botStartTime time.Time) trader.BotConfig {
@@ -563,6 +576,8 @@ func runTradeCmd(options inputs) {
 	botConfig = convertDeprecatedBotConfigValues(l, botConfig)
 	l.Infof("Trading %s:%s for %s:%s\n", botConfig.AssetCodeA, botConfig.IssuerA, botConfig.AssetCodeB, botConfig.IssuerB)
 
+	plugins.CustomConfigVarPlugins = readCustomConfigTrade(options)
+
 	var guiVersionFlag string
 	if *options.ui {
 		guiVersionFlag = guiVersion
@@ -642,6 +657,8 @@ func runTradeCmd(options inputs) {
 		HorizonURL: botConfig.HorizonURL,
 		HTTP:       http.DefaultClient,
 	}
+	//inject horizonURL in delegated Singing Submit var
+	plugins.HorizonURLForDelSigning = botConfig.HorizonURL
 	if !*options.noHeaders {
 		client.AppName = "kelp--cli--bot"
 		if *options.ui {
