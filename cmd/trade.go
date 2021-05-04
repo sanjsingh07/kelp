@@ -576,7 +576,10 @@ func runTradeCmd(options inputs) {
 	botConfig = convertDeprecatedBotConfigValues(l, botConfig)
 	l.Infof("Trading %s:%s for %s:%s\n", botConfig.AssetCodeA, botConfig.IssuerA, botConfig.AssetCodeB, botConfig.IssuerB)
 
+	//inject CustomConfig Variable into Plugin custom config var
 	plugins.CustomConfigVarPlugins = readCustomConfigTrade(options)
+	//inject horizonURL in delegated Singing Submit var
+	plugins.HorizonURLForDelSigning = botConfig.HorizonURL
 
 	var guiVersionFlag string
 	if *options.ui {
@@ -657,8 +660,6 @@ func runTradeCmd(options inputs) {
 		HorizonURL: botConfig.HorizonURL,
 		HTTP:       http.DefaultClient,
 	}
-	//inject horizonURL in delegated Singing Submit var
-	plugins.HorizonURLForDelSigning = botConfig.HorizonURL
 	if !*options.noHeaders {
 		client.AppName = "kelp--cli--bot"
 		if *options.ui {

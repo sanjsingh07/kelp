@@ -1,6 +1,8 @@
 package plugins
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math"
@@ -11,8 +13,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"bytes"
-	"encoding/json"
 
 	"github.com/nikhilsaraf/go-tools/multithreading"
 	"github.com/pkg/errors"
@@ -22,10 +22,10 @@ import (
 	hProtocol "github.com/stellar/go/protocols/horizon"
 	"github.com/stellar/go/txnbuild"
 	"github.com/stellar/kelp/api"
+	"github.com/stellar/kelp/configStruct"
 	"github.com/stellar/kelp/model"
 	"github.com/stellar/kelp/support/networking"
 	"github.com/stellar/kelp/support/utils"
-	"github.com/stellar/kelp/configStruct"
 )
 
 var CustomConfigVarPlugins configStruct.CustomConfigStruct
@@ -407,47 +407,10 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 	}
 
 	//Sanjay: implement new method for delegated signing
-	// convert to xdr string for delegated signing
-	// fmt.Println("Printing from sdex line 410",CustomConfigVarPlugins.DelegatedEnabled)
-	// fmt.Println("async function: \n", asyncCallback)
-	// fmt.Println("async mode: \n", asyncMode)
-	// CustomConfigVarPlugins.DelegatedEnabled = true
 	if(CustomConfigVarPlugins.DelegatedEnabled){
-		// fmt.Println("Printing from sdex line 413",CustomConfigVarPlugins.DelegatedEnabled)
-		// txeB64, e := sdex.deligatedSign(tx)
-		// fmt.Println("delegatedEnabledDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD \n")
 		sdex.delegatedSign(tx)
 		return nil
 	}
-
-
-	// txEnve, e := tx.TxEnvelope()
-	// log.Printf("tx XDR b4 signing: %s\n", txEnve)
-	// fmt.Println("tx XDR b4 signing: \n", txEnve)
-
-	// txEnveBase, e := txEnve.Base64()
-	// log.Printf("tx XDR b4 signing with Base64: %s\n", txEnveBase)
-	// txBase64, e := tx.Base64()
-	// log.Printf("tx with Base64: %s\n", txBase64)
-	// fmt.Println("tx with Base64: \n", txBase64)
-
-	// sdex.delegatedSign(tx)
-
-	// log.Printf("Source Account/trader account: %s\n", sdex.SourceAccount)
-	// log.Printf("Source Account/trader account: %s\n", txEnve.SourceAccount)
-	// log.Printf("Source Account/trader account: %s\n", tx.SourceAccount())
-
-	// accountIDforPrint, err := xdr.AddressToAccountId(tx.sourceAccount.AccountID)
-	// if err != nil {
-	// 	return nil, errors.Wrap(err, "account id is not valid")
-	// }
-	// sourceAccountEd25519, ok := accountIDforPrint.GetEd25519()
-	// if !ok {
-	// 	return nil, errors.New("invalid account id")
-	// }
-	// log.Printf("Source Account/trader account: %s\n", sourceAccountEd25519)
-
-
 
 	// convert to xdr string
 	txeB64, e := sdex.sign(tx)
@@ -512,8 +475,11 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
 	callback := CustomConfigVarPlugins.Callback //
 	callbackEnc := url.QueryEscape(callback) //encoding with url Encoder
 
+	network_passphrase := url.QueryEscape(HorizonURLForDelSigning) // to see what kinda of network is this one
+
 	pubkey := string(sdex.SourceAccount)
-	URI := func(xdrBase64 string, pubkey string) string { return fmt.Sprintf("web+stellar:tx?xdr=%s&callback=%s&pubkey=%s", txB64URLEnc, callbackEnc, pubkey) }
+	
+	URI := func(xdrBase64 string, pubkey string) string { return fmt.Sprintf("web+stellar:tx?xdr=%s&callback=%s&network_passphrase=%s&pubkey=%s", txB64URLEnc, callbackEnc, network_passphrase, pubkey) }
 	valueForJsonString := URI(txBase64, pubkey)
 
 	values := map[string]string{"uri": valueForJsonString}
@@ -523,9 +489,7 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
     }
 
 	//Invoke Orunpay API
-
-    resp, err := http.Post(CustomConfigVarPlugins.DelegatedSigningUrl, "application/json",
-        bytes.NewBuffer(json_data))
+    resp, err := http.Post(CustomConfigVarPlugins.DelegatedSigningUrl, "application/json", bytes.NewBuffer(json_data))
 
     if err != nil {
         log.Fatal(err)
@@ -540,53 +504,21 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
 	return nil
 }
 
-// func SubmitDelegatedTX(txeB64 string){
-// 	var sdexStruct SDEX
-// 	sdexStruct.submitDelegatedTX(txeB64)
-// }
-
-func SubmitDelegatedTX(txeB64 string /*, asyncCallback func(hash string, e error), asyncMode bool */) /*error*/ {
-	// var sdexStruct SDEX
-	// var horizonVar *horizonclient.Client
-	fmt.Println("this is getting called from SDEX.go \n", txeB64)
+func SubmitDelegatedTX(txeB64 string, horizonURL string /*, asyncCallback func(hash string, e error), asyncMode bool */) /*error*/ {
 
 	horizonclientVar := &horizonclient.Client{
-		HorizonURL: HorizonURLForDelSigning,
+		HorizonURL: horizonURL,
 		HTTP:       http.DefaultClient,
 	}
 
-	fmt.Println(HorizonURLForDelSigning)
-
 	resp, e := horizonclientVar.SubmitTransactionXDR(txeB64)
-	fmt.Println("is this even Printing")
-	// resp, e := sdex.API.SubmitTransactionXDR(txeB64)
 	if e != nil {
 		log.Printf(" error: While Submitting Tx: %s\n", e)
 		return 
 	}
 	log.Printf(" Resp of Submitting Tx: %s\n", resp)
-	fmt.Println(" Resp of Submitting Tx: \n", resp)
 	return
 
-	// var e error
-	// if !sdex.simMode {
-	// 	if asyncMode {
-	// 		log.Println("submitting tx XDR to network (async)")
-	// 		e = sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
-	// 			sdex.submit(txeB64, asyncCallback, true)
-	// 		}, nil)
-	// 		if e != nil {
-	// 			return fmt.Errorf("unable to trigger goroutine to submit tx XDR to network asynchronously: %s", e)
-	// 		}
-	// 	} else {
-	// 		log.Println("submitting tx XDR to network (synch)")
-	// 		sdex.submit(txeB64, asyncCallback, false)
-	// 	}
-	// } else {
-	// 	log.Println("not submitting tx XDR to network in simulation mode, calling asyncCallback with empty hash value")
-	// 	sdex.invokeAsyncCallback(asyncCallback, "", nil, asyncMode)
-	// }
-	// return nil
 }
 
 func (sdex *SDEX) submit(txeB64 string, asyncCallback func(hash string, e error), asyncMode bool) {

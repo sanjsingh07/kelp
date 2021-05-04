@@ -127,17 +127,8 @@ func init() {
 		backend.CustomConfigVarJWT = customConfigVar
 		plugins.CustomConfigVarPlugins = customConfigVar
 
-		//short var for custom config struct initialzer for UI config file
-		shortVarForUIConfig := configStruct.CustomConfigStruct{
-			Auth0Enabled : customConfigVar.Auth0Enabled,
-			Domain :	   customConfigVar.Domain,
-			ClientId :	   customConfigVar.ClientId,
-			Audience :	   customConfigVar.Audience,
-			DelegatedEnabled :customConfigVar.DelegatedEnabled,
-		}
-
 		//writing to "custom_config_ui" file in ./gui/web/src
-		file, _ := json.MarshalIndent(shortVarForUIConfig, "", " ")
+		file, _ := json.MarshalIndent(customConfigVar, "", " ")
 		_ = ioutil.WriteFile(filePathname, file, 0644)
 		
 		e = backend.InitBotNameRegex()
