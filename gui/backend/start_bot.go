@@ -140,28 +140,34 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 	}
 
 	go func(kelpCommand *exec.Cmd, name string) {
-		defer s.kos.SafeUnregister(name)
 
-		e := kelpCommand.Wait()
-		if e != nil {
-			if strings.Contains(e.Error(), "signal: killed") {
-				log.Printf("bot '%s' with strategy '%s' was stopped (most likely from UI action)", name, strategy)
+		//since we are not using Goroutine, so dont need Wait(), so to fix bot stopped with status 2 exit error we made whole thing conditional
+		if(CustomConfigVarJWT.DelegatedEnabled){
+			time.Sleep(90 * time.Second)
+		} else {
+			defer s.kos.SafeUnregister(name)
+
+			e := kelpCommand.Wait()
+			if e != nil {
+				if strings.Contains(e.Error(), "signal: killed") {
+					log.Printf("bot '%s' with strategy '%s' was stopped (most likely from UI action)", name, strategy)
+					return
+				}
+
+				s.addKelpErrorToMap(makeKelpErrorResponseWrapper(
+					errorTypeBot,
+					botName,
+					time.Now().UTC(),
+					errorLevelError,
+					fmt.Sprintf("unknown error in start bot command for bot '%s' with strategy '%s': %s", name, strategy, e),
+				).KelpError)
+
+				// set state to stopped
+				s.abruptStoppedState(botName)
+
+				// we don't want to continue because the bot didn't finish correctly
 				return
 			}
-
-			s.addKelpErrorToMap(makeKelpErrorResponseWrapper(
-				errorTypeBot,
-				botName,
-				time.Now().UTC(),
-				errorLevelError,
-				fmt.Sprintf("unknown error in start bot command for bot '%s' with strategy '%s': %s", name, strategy, e),
-			).KelpError)
-
-			// set state to stopped
-			s.abruptStoppedState(botName)
-
-			// we don't want to continue because the bot didn't finish correctly
-			return
 		}
 
 		log.Printf("finished start bot command for bot '%s' with strategy '%s'\n", name, strategy)
