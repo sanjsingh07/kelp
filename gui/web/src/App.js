@@ -332,7 +332,7 @@ class App extends Component {
             render={(props) => <NewBot {...props} baseUrl={baseUrl} enablePubnetBots={enablePubnetBots}/>}
             />
         </Router>
-        <Welcome quitFn={this.quit}/>
+        {/* <Welcome quitFn={this.quit}/> */}
       </div>
     );
   }

@@ -13,18 +13,22 @@
 }
 
 .title {
-  color: $color-contrast-1;
+  color: $color-base-1;
   font-size: 18/16+rem;
   font-weight: 200;
   padding-top: 1rem;
   padding-bottom: 2rem;
 }
 
+.color {
+  color: $color-base-1;
+}
+
 .primary-action {
 }
 
 .separator {
-  color: $color-contrast-2;
+  color: $color-base-1;
   margin: 1.7rem;
 }
 

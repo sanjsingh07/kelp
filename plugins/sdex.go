@@ -408,7 +408,13 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 
 	//Sanjay: implement new method for delegated signing
 	if(CustomConfigVarPlugins.DelegatedEnabled){
-		sdex.delegatedSign(tx)
+		// sdex.delegatedSign(tx)
+		e := sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
+			sdex.delegatedSign(tx)
+		}, nil)
+		if e != nil {
+			return fmt.Errorf("unable to trigger goroutine to send tx XDR to delegatedSigning Network asynchronously: %s", e)
+		}
 		return nil
 	}
 
@@ -461,14 +467,12 @@ func (sdex *SDEX) sign(tx *txnbuild.Transaction) (string, error) {
 }
 
 // Added by Sanjay to impplement deligated signing
-func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
-	var e error
-	if e != nil {
-		return e
-	}
+func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) {
+
 	txBase64, err := tx.Base64() //converting tx to txXDR base64
 	if err != nil {
-		return err
+		log.Printf("error while converting tx to base64: %s\n", err)
+		return
 	}
 	txB64URLEnc := url.QueryEscape(txBase64) //encoding with url Encoder
 
@@ -500,8 +504,6 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
     json.NewDecoder(resp.Body).Decode(&res)
     fmt.Println(res)
     fmt.Println(res["json"])
-
-	return nil
 }
 
 func SubmitDelegatedTX(txeB64 string, horizonURL string /*, asyncCallback func(hash string, e error), asyncMode bool */) /*error*/ {

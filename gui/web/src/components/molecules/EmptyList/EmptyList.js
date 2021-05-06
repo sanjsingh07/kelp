@@ -17,10 +17,10 @@ class EmptyList extends Component {
     return (
       <div className={styles.empty}>
         <img src={emptyIcon} className={styles.icon} alt="Empty icon"/>
-        <h2 className={styles.title}>Your Kelp forest is empty</h2>
+        <h2 className={styles.title}>Your OrunPay forest is empty</h2>
         <Button eventName="main-newbot-autogen" onClick={this.props.autogenerateFn}>Autogenerate your first test bot on TestNet</Button>
         <span className={styles.separator}>or</span>
-        <Button eventName="main-newbot-first" onClick={this.props.createBotFn} variant="link">Create your first bot</Button>
+        <Button className={styles.color} eventName="main-newbot-first" onClick={this.props.createBotFn} variant="link">Create your first bot</Button>
       </div> 
     );
   }
