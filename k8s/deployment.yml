@@ -19,14 +19,24 @@ spec:
       - name: kelp-dev
         image: sanjsingh07/kelp-dev
         command:
-          - ./bin/kelp server -p 8000 --no-electron -c /kelp-config/custom_config.cfg
+          [ "./bin/kelp"]
+        args: 
+          ["server","--no-electron", "-c", "/kelp-config/custom_config.cfg"]
         ports:
-          - containerPort: 8000
+        - name: ccxt-port
+          containerPort: 3000
+        - name: kelp-port
+          containerPort: 8000
         volumeMounts:
         - name: kelp-config
           mountPath: /kelp-config
+        - name: azurefileshare
+          mountPath: /root/.kelp/bot_data
         imagePullPolicy: Always
       volumes:
         - name: kelp-config
           configMap:
             name: kelp-config
+        - name: azurefileshare
+          persistentVolumeClaim:
+            claimName: azurefile

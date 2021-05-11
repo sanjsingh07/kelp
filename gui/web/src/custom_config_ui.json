@@ -1,9 +1,9 @@
 {
  "auth0_enabled": false,
- "domain": "dev-6esg0i02.eu.auth0.com",
- "client_id": "7I47ob2UIUN0NxoJO8bmcbenXKF29hY5",
- "audience": "https://localhost:3000/api/v2/",
- "delegated_enabled": true,
- "delegated_signing_url": "https://orunpay-api.herokuapp.com/v1/transactions/sep0007",
- "callback_url": "https://867cb61fcc2d.ngrok.io/api/v1/signedCallback"
+ "domain": "",
+ "client_id": "",
+ "audience": "",
+ "delegated_enabled": false,
+ "delegated_signing_url": "",
+ "callback_url": ""
 }

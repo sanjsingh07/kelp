@@ -11,13 +11,13 @@ data:
     AUTH0_ENABLED=false
 
     #auth0 domain
-    DOMAIN="domain_goes_here" #example "dev-*******.eu.auth0.com"
+    DOMAIN="dev-6esg0i02.eu.auth0.com"  #"domain_goes_here" #example "dev-*******.eu.auth0.com"
 
     #auth0 clientID
-    CLIENT_ID="Client_id_goes_here" #examples "7I47ob2************XKF29hY5"
+    CLIENT_ID="7I47ob2UIUN0NxoJO8bmcbenXKF29hY5"    #"Client_id_goes_here" #examples "7I47ob2************XKF29hY5"
 
     #auth0 audience
-    AUDIENCE="AUdience_goes_here"
+    AUDIENCE="https://localhost:3000/api/v2/"   #"AUdience_goes_here"
 
 
 

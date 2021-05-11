@@ -6,11 +6,13 @@ metadata:
      app: kelp-service
       
 spec:
-   type: LoadBalancer
-   ports:
-     - protocol: TCP
-       port: 8000
-       targetPort: 8000
-       name: http
-   selector:
+  type: LoadBalancer
+  ports:
+  - name: ccxt-port
+    port: 3000
+    targetPort: 3000
+  - name: kelp-port
+    port: 8000
+    targetPort: 8000
+  selector:
      app: kelp-pod

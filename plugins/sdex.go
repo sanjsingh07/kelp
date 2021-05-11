@@ -408,13 +408,13 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 
 	//Sanjay: implement new method for delegated signing
 	if(CustomConfigVarPlugins.DelegatedEnabled){
-		// sdex.delegatedSign(tx)
-		e := sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
-			sdex.delegatedSign(tx)
-		}, nil)
-		if e != nil {
-			return fmt.Errorf("unable to trigger goroutine to send tx XDR to delegatedSigning Network asynchronously: %s", e)
-		}
+		sdex.delegatedSign(tx)
+		// e := sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
+		// 	sdex.delegatedSign(tx)
+		// }, nil)
+		// if e != nil {
+		// 	return fmt.Errorf("unable to trigger goroutine to send tx XDR to delegatedSigning Network asynchronously: %s", e)
+		// }
 		return nil
 	}
 
