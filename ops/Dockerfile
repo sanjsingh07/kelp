@@ -6,6 +6,8 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt update
 RUN apt -y install yarn
+RUN apt install -y nfs-common
+RUN apt install -y cifs-utils
 
 #install zip to fix unzip ccxt issue
 RUN apt install -y zip
@@ -21,16 +23,13 @@ RUN go get -u github.com/Masterminds/glide
 
 # install kelp
 RUN git clone https://github.com/orunpay/kelp .
-RUN git checkout auth0-integration
+RUN git checkout deployment
 RUN git fetch --tags
 RUN glide install
 
 # install astielectron
 RUN go get -u github.com/asticode/go-astilectron-bundler/...
 RUN go install github.com/asticode/go-astilectron-bundler/astilectron-bundler
-
-# needed libtool for sodium
-# RUN apt-get install -y autoconf automake g++ libtool
 
 # run build script
 RUN ./scripts/build.sh
