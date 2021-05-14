@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared1
+  labels:
+    app: cloudflared1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudflared1
+  template:
+    metadata:
+      labels:
+        app: cloudflared1
+    spec:
+      containers:
+      - name: cloudflared1
+        image: cloudflare/cloudflared
+        ports:
+        - containerPort: 80

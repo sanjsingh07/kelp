@@ -11,23 +11,23 @@ data:
     AUTH0_ENABLED=false
 
     #auth0 domain
-    DOMAIN="dev-6esg0i02.eu.auth0.com"  #"domain_goes_here" #example "dev-*******.eu.auth0.com"
+    DOMAIN="dev-orunpay.eu.auth0.com"  #"domain_goes_here" #example "dev-*******.eu.auth0.com"
 
     #auth0 clientID
-    CLIENT_ID="7I47ob2UIUN0NxoJO8bmcbenXKF29hY5"    #"Client_id_goes_here" #examples "7I47ob2************XKF29hY5"
+    CLIENT_ID="4wsfguulhcHdXSAN3NmvUDSljAag59WR"    #"Client_id_goes_here" #examples "7I47ob2************XKF29hY5"
 
     #auth0 audience
-    AUDIENCE="https://localhost:3000/api/v2/"   #"AUdience_goes_here"
+    AUDIENCE="https://qa.api.orunpay.com/v1"   #"AUdience_goes_here"
 
 
 
     #[DELEGATED]
 
     #delegated things here
-    DELEGATED_ENABLED=false
+    DELEGATED_ENABLED=true
 
     #delegated signing url here
-    DELEGATED_SIGNING_URL="DELEGATED_SIGNING_URL_GOES_HERE"
+    DELEGATED_SIGNING_URL="https://orunpay-api.herokuapp.com/v1/transactions/sep0007"
 
     #delegated callback url here
     CALLBACK_URL="callback_url_goes_here"
