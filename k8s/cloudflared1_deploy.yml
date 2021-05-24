@@ -19,3 +19,8 @@ spec:
         image: cloudflare/cloudflared
         ports:
         - containerPort: 80
+      selector:
+        app: kelp-service-ingress
+        # type: ClusterIP
+      cloudflareFile: 
+        secretName: cloudflare-t1-secret

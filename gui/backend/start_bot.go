@@ -144,12 +144,12 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 	go func(kelpCommand *exec.Cmd, name string) {
 
 		// since we are not using Goroutine, so dont need Wait(), so to fix bot stopped with status 2 exit error we made whole thing conditional
-		if(CustomConfigVarJWT.DelegatedEnabled){
-			defer s.kos.SafeUnregister(name)
+		// if(CustomConfigVarJWT.DelegatedEnabled){
+			// defer s.kos.SafeUnregister(name)
 			// time.Sleep(90 * time.Second)
 			// e := kelpCommand.Wait()
 			// fmt.Println("error in start_bot: ", e)
-		} else {
+		// } else {
 			defer s.kos.SafeUnregister(name)
 
 			e := kelpCommand.Wait()
@@ -175,7 +175,7 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 				// we don't want to continue because the bot didn't finish correctly
 				return
 			}
-		}
+		// }
 
 		log.Printf("finished start bot command for bot '%s' with strategy '%s'\n", name, strategy)
 		if maybeFinishCallback != nil {
