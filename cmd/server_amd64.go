@@ -370,17 +370,17 @@ func init() {
 			usersSpecificBot := dataPath.Join()
 			botConfigsPath := usersSpecificBot.Join("configs")
 			botLogsPath := usersSpecificBot.Join("logs")
-			traderFilePath := usersSpecificBot.Join("custom_config.cfg")
+			configFilePath := dataPath.Join("custom_config.cfg")
 			// if e != nil {
 			// 	log.Printf("error creating custom_config.cfg: %s\n", e)
 			// }
-			e := toml.WriteFile(traderFilePath.Native(), &customConfigVar)
+			e := toml.WriteFile(configFilePath.Native(), &customConfigVar)
 			if e != nil {
 				log.Printf("error writing Custom Config toml file: %s\n", e)
 				return
 			}
 		
-
+			backend.DataPath = dataPath
 			backend.UsersSpecificBot = usersSpecificBot
 			backend.BotConfigsPath = botConfigsPath
 			backend.BotLogsPath = botLogsPath

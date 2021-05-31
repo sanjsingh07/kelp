@@ -4,19 +4,12 @@ import (
 	"net/http"
 	"net/url"
 	"fmt"
-	// "log"
+
 	"io/ioutil"
 	"strings"
 	"github.com/stellar/kelp/plugins"
 
 )
-
-// type SignedURIStruct struct {
-// 	SignedURI string `json:"uri"`
-// }
-// type delegatedSignSubmit struct {
-// 	sdex                 *plugins.SDEX
-// }
 
 func (s *APIServer) /*(t *delegatedSignSubmit)*/ signedCallback(w http.ResponseWriter, r *http.Request) {
 	signedTXBODY, e := ioutil.ReadAll(r.Body)
@@ -24,7 +17,6 @@ func (s *APIServer) /*(t *delegatedSignSubmit)*/ signedCallback(w http.ResponseW
 		s.writeErrorJson(w, fmt.Sprintf("error when reading request input: %s\n", e))
 		return
 	}
-	// log.Printf("signedCallback requestJson line 23: %s\n", string(signedTXBODY))
 
 	stringToBeMani := string(signedTXBODY)
 	strParts := strings.Split(stringToBeMani, "&")
@@ -50,8 +42,6 @@ func (s *APIServer) /*(t *delegatedSignSubmit)*/ signedCallback(w http.ResponseW
 	}
 
 	plugins.SubmitDelegatedTX(decodedXDR, decodedHorizonUrl)
-
-
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{ok}"))

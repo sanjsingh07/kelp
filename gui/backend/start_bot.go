@@ -106,7 +106,7 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 
 	// if(CustomConfigVarJWT.DELEGATED_ENABLED){//add below code snippet here} will need if wanna precise and dont wanna 'read custom config/pass custom config'
 	//custom config file path:
-	customConfigRelativePath, e :=	BotConfigsPath.Join("custom_config.cfg").RelFromPath(s.kos.GetDotKelpWorkingDir())
+	customConfigRelativePath, e :=	DataPath.Join("custom_config.cfg").RelFromPath(s.kos.GetDotKelpWorkingDir())
 	if e != nil {
 		return fmt.Errorf("unable to get relative path of custom config path from basepath: %s", e)
 	}
@@ -134,54 +134,44 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 	if e != nil {
 		return fmt.Errorf("could not start bot %s: %s", botName, e)
 	}
-	fmt.Println("Printing P: ",p)
-	fmt.Println("print E: ",e)
 
 	if p.Cmd == nil {
 		return fmt.Errorf("kelpCommand (p.Cmd) was nil for bot '%s' with strategy '%s'", botName, strategy)
 	}
 
-	go func(kelpCommand *exec.Cmd, name string) {
+		go func(kelpCommand *exec.Cmd, name string) {
 
-		// since we are not using Goroutine, so dont need Wait(), so to fix bot stopped with status 2 exit error we made whole thing conditional
-		// if(CustomConfigVarJWT.DelegatedEnabled){
-			// defer s.kos.SafeUnregister(name)
-			// time.Sleep(90 * time.Second)
-			// e := kelpCommand.Wait()
-			// fmt.Println("error in start_bot: ", e)
-		// } else {
-			defer s.kos.SafeUnregister(name)
+				defer s.kos.SafeUnregister(name)
 
-			e := kelpCommand.Wait()
-			fmt.Println("error in start_bot: ", e)
-			if e != nil {
-				// fmt.Println("error in start_bot: ", e)
-				if strings.Contains(e.Error(), "signal: killed") {
-					log.Printf("bot '%s' with strategy '%s' was stopped (most likely from UI action)", name, strategy)
+				e := kelpCommand.Wait()
+				if e != nil {
+					// fmt.Println("error in start_bot: ", e)
+					if strings.Contains(e.Error(), "signal: killed") {
+						log.Printf("bot '%s' with strategy '%s' was stopped (most likely from UI action)", name, strategy)
+						return
+					}
+
+					s.addKelpErrorToMap(makeKelpErrorResponseWrapper(
+						errorTypeBot,
+						botName,
+						time.Now().UTC(),
+						errorLevelError,
+						fmt.Sprintf("unknown error in start bot command for bot '%s' with strategy '%s': %s", name, strategy, e),
+					).KelpError)
+
+					// set state to stopped
+					s.abruptStoppedState(botName)
+
+					// we don't want to continue because the bot didn't finish correctly
 					return
 				}
+			// }
 
-				s.addKelpErrorToMap(makeKelpErrorResponseWrapper(
-					errorTypeBot,
-					botName,
-					time.Now().UTC(),
-					errorLevelError,
-					fmt.Sprintf("unknown error in start bot command for bot '%s' with strategy '%s': %s", name, strategy, e),
-				).KelpError)
-
-				// set state to stopped
-				s.abruptStoppedState(botName)
-
-				// we don't want to continue because the bot didn't finish correctly
-				return
+			log.Printf("finished start bot command for bot '%s' with strategy '%s'\n", name, strategy)
+			if maybeFinishCallback != nil {
+				maybeFinishCallback()
 			}
-		// }
-
-		log.Printf("finished start bot command for bot '%s' with strategy '%s'\n", name, strategy)
-		if maybeFinishCallback != nil {
-			maybeFinishCallback()
-		}
-	}(p.Cmd, botName)
+		}(p.Cmd, botName)
 
 	return nil
 }

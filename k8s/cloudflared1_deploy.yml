@@ -17,10 +17,13 @@ spec:
       containers:
       - name: cloudflared1
         image: cloudflare/cloudflared
-        ports:
-        - containerPort: 80
-      selector:
-        app: kelp-service-ingress
-        # type: ClusterIP
-      cloudflareFile: 
-        secretName: cloudflare-t1-secret
+        imagePullPolicy: Always
+        command: ["cloudflared", "tunnel", "--config", "/cloudflare/config.yml", "--no-autoupdate", "run"]
+        args: ["--force", "--credentials-file", "/cloudflare/tunnel1-credentials.json", "1fa2e4e3-3fec-469b-bb65-10f414c96dbe"]
+        volumeMounts:
+        - name: cloudflare-config1
+          mountPath: /cloudflare
+      volumes:
+        - name: cloudflare-config1
+          configMap:
+            name: cloudflare-config1

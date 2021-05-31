@@ -35,26 +35,26 @@ type JSONWebKeys struct {
 var CustomConfigVarJWT configStruct.CustomConfigStruct
 
 var userIDfromjwt string
-var UsersSpecificBot, BotConfigsPath, BotLogsPath *kelpos.OSPath
+var DataPath, UsersSpecificBot, BotConfigsPath, BotLogsPath *kelpos.OSPath
 
 func callFromJWTMiddlewareVar() {
 	kos := kelpos.GetKelpOS()
 	trimmedID := strings.TrimLeft(userIDfromjwt, "auth0|")
 
 	UserIDGlobal := "user_"+trimmedID
-	dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+	DataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
 
-	UsersSpecificBot = dataPath.Join(UserIDGlobal)
-	traderFilePath := UsersSpecificBot.Join("custom_config.cfg")
+	UsersSpecificBot = DataPath.Join(UserIDGlobal)
+	BotConfigsPath = UsersSpecificBot.Join("configs")
+	configFilePath := DataPath.Join("custom_config.cfg")
 	// if e != nil {
 	// 	log.Printf("error creating custom_config.cfg: %s\n", e)
 	// }
-	e := toml.WriteFile(traderFilePath.Native(), &CustomConfigVarJWT)
+	e := toml.WriteFile(configFilePath.Native(), &CustomConfigVarJWT)
 	if e != nil {
 		log.Printf("error writing Custom Config toml file: %s\n", e)
 		return
 	}
-	BotConfigsPath = UsersSpecificBot.Join("configs")
 	BotLogsPath = UsersSpecificBot.Join("logs")
 }
 

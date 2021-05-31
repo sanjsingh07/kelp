@@ -10,6 +10,16 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   rules:
+  # - host: trader.orunpay.com
+  #   http:
+  #     paths:
+  #     - path: /(.*)
+  #       pathType: Prefix
+  #       backend:
+  #         service:
+  #           name: kelp-service
+  #           port:
+  #             number: 80
   - http:
       paths:
       - path: /(.*)
@@ -18,8 +28,8 @@ spec:
           service:
             name: kelp-service
             port:
-              number: 80
-      - path: /(.*)
+              number: 443
+      - path: /ccxt
         pathType: Prefix
         backend:
           service:

@@ -30,9 +30,9 @@ func SetRoutes(r *chi.Mux, s *APIServer) {
 		r.Post("/fetchPrice", http.HandlerFunc(s.fetchPrice))
 		r.Post("/upsertBotConfig", http.HandlerFunc(s.upsertBotConfig))
 		r.Post("/sendMetricEvent", http.HandlerFunc(s.sendMetricEvent))
-		r.Post("/signedCallback", http.HandlerFunc(s.signedCallback))
 	})
 	r.Get("/ping", http.HandlerFunc(s.ping))
+	r.Post("/signedCallback", http.HandlerFunc(s.signedCallback))
 }
 
 func SetRoutesWithAuth0(r *chi.Mux, s *APIServer) {
@@ -58,7 +58,7 @@ func SetRoutesWithAuth0(r *chi.Mux, s *APIServer) {
 		r.Post("/fetchPrice", http.HandlerFunc(s.fetchPrice))
 		r.Post("/upsertBotConfig", http.HandlerFunc(s.upsertBotConfig))
 		r.Post("/sendMetricEvent", http.HandlerFunc(s.sendMetricEvent))
-		r.Post("/signedCallback", http.HandlerFunc(s.signedCallback))
 	})
 	r.Get("/ping", http.HandlerFunc(s.ping))
+	r.Post("/signedCallback", http.HandlerFunc(s.signedCallback))
 }

@@ -1,6 +1,7 @@
 package kelpos
 
 import (
+	// "bytes"
 	"bufio"
 	"fmt"
 	"io/ioutil"
@@ -96,10 +97,6 @@ func (kos *KelpOS) Blocking(namespace string, cmd string) ([]byte, error) {
 // Background runs the provided bash command in the background and registers the command
 func (kos *KelpOS) Background(namespace string, cmd string) (*Process, error) {
 	c := exec.Command("bash", "-c", cmd)
-	// fmt.Println("Printing exec.Command: \n", string(c))
-	// fmt.Println("Printing exec.Command.Output(): \n", string(c.Output()))
-	// b, _ := ioutil.ReadAll(c.Stdout)
-	// println("output of c.Stdout: " + string(b))
 
 	// always execute commands from the working directory (specify as native since underlying OS handles it)
 	// using dotKelpWorkingDir as working directory since all our config files and log files are located in here and we want
@@ -111,21 +108,15 @@ func (kos *KelpOS) Background(namespace string, cmd string) (*Process, error) {
 	if e != nil {
 		return nil, fmt.Errorf("could not get Stdin pipe for bash command '%s': %s", cmd, e)
 	}
-	// b, _ := ioutil.ReadAll(stdinWriter)
-    //     println("output of stdinWriter: " + string(b))
 	stdoutReader, e := c.StdoutPipe()
 	if e != nil {
 		return nil, fmt.Errorf("could not get Stdout pipe for bash command '%s': %s", cmd, e)
 	}
-	// b, _ := ioutil.ReadAll(stdoutReader)
-	// println("output of stdoutWriter: " + string(b))
 
 	e = c.Start()
 	if e != nil {
 		return nil, fmt.Errorf("could not start bash command '%s': %s", cmd, e)
 	}
-	// b, _ := ioutil.ReadAll(e)
-	// println("output of c.Start(): " + string(b))
 
 	p := &Process{
 		Cmd:    c,

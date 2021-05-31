@@ -5,5 +5,5 @@
  "audience": "https://localhost:3000/api/v2/",
  "delegated_enabled": true,
  "delegated_signing_url": "https://orunpay-api.herokuapp.com/v1/transactions/sep0007",
- "callback_url": "http://372acbd870a0.ngrok.io/signedCallback"
+ "callback_url": "https://48ba48a8e4f4.ngrok.io/signedCallback"
 }

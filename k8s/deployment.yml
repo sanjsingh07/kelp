@@ -21,12 +21,12 @@ spec:
         command:
           [ "./bin/kelp"]
         args: 
-          ["server","--no-electron", "-p" , "80" ,"-c", "/kelp-config/custom_config.cfg"]
+          ["server","--no-electron", "-p" , "443" ,"-c", "/kelp-config/custom_config.cfg"]
         ports:
         - name: ccxt-port
           containerPort: 3000
         - name: kelp-port
-          containerPort: 80
+          containerPort: 443
         volumeMounts:
         - name: kelp-config
           mountPath: /kelp-config

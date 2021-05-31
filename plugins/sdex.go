@@ -409,44 +409,10 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 
 	//Sanjay: implement new method for delegated signing
 	if(CustomConfigVarPlugins.DelegatedEnabled){
-		txeB64 := sdex.delegatedSign(tx)
-		// if e != nil {
-		// 	return fmt.Errorf("error when sending xdr to signed: %s", e)
-		// }
-		// e := sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
-		// 	sdex.delegatedSign(tx)
-		// }, nil)
-		// if e != nil {
-		// 	return fmt.Errorf("unable to trigger goroutine to send tx XDR to delegatedSigning Network asynchronously: %s", e)
-		// }
-		fmt.Println("Printing Signed XDR: ", txeB64)
-
-		if e != nil {
-			return e
-		}
-		log.Printf("tx XDR: %s\n", txeB64)
-	
-		// submit
-		if !sdex.simMode {
-			if asyncMode {
-				log.Println("submitting tx XDR to network (async)")
-				e = sdex.threadTracker.TriggerGoroutine(func(inputs []interface{}) {
-					sdex.submit(txeB64, asyncCallback, true)
-				}, nil)
-				if e != nil {
-					return fmt.Errorf("unable to trigger goroutine to submit tx XDR to network asynchronously: %s", e)
-				}
-			} else {
-				log.Println("submitting tx XDR to network (synch)")
-				sdex.submit(txeB64, asyncCallback, false)
-			}
-		} else {
-			log.Println("not submitting tx XDR to network in simulation mode, calling asyncCallback with empty hash value")
-			sdex.invokeAsyncCallback(asyncCallback, "", nil, asyncMode)
-		}
+		sdex.delegatedSign(tx)
 		return nil
 	}
-
+		
 	// convert to xdr string
 	txeB64, e := sdex.sign(tx)
 
@@ -496,7 +462,7 @@ func (sdex *SDEX) sign(tx *txnbuild.Transaction) (string, error) {
 }
 
 // Added by Sanjay to impplement deligated signing
-func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (string) {
+func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) /*(string)*/ {
 
 	txBase64, err := tx.Base64() //converting tx to txXDR base64
 	if err != nil {
@@ -534,51 +500,26 @@ func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (string) {
     fmt.Println(res)
     fmt.Println(res["json"])
 
-	// response := SignedXDRChannel
-	fmt.Println("b4 channel")
-	mychanl := make(chan string)
-
-	go SendDataToChannel(mychanl)
-
-	fmt.Println("b4 return channel value")
-	return <-mychanl
-
+	return
 }
 
-func SendDataToChannel(s chan<- string) {
-	var testString string
-	testString = <- SignedXDRChannel
-    s <- testString
-}
-
-// func SendDataToChannel(ch chan string, value string) {
-//     SignedXDRChannel <- value
-// 	ReturnSignedXDR(SignedXDRChannel)
-// }
-
-// func ReturnSignedXDR(xdr chan) (chan string) {
-// 	return xdr
-// }
 
 func SubmitDelegatedTX(txeB64 string, horizonURL string /*, asyncCallback func(hash string, e error), asyncMode bool */) /*error*/ {
 
-	// go SendDataToChannel(SignedXDRChannel, txeB64)
-	// fmt.Println("singed tx: ", txeB64)
-	SignedXDRChannel <- txeB64
+	fmt.Println("singed tx: ", txeB64)
 
-	// horizonclientVar := &horizonclient.Client{
-	// 	HorizonURL: horizonURL,
-	// 	HTTP:       http.DefaultClient,
-	// }
+	horizonclientVar := &horizonclient.Client{
+		HorizonURL: horizonURL,
+		HTTP:       http.DefaultClient,
+	}
 
-	// resp, e := horizonclientVar.SubmitTransactionXDR(txeB64)
-	// if e != nil {
-	// 	log.Printf(" error: While Submitting Tx: %s\n", e)
-	// 	return 
-	// }
-	// log.Printf(" Resp of Submitting Tx: %s\n", resp)
+	resp, e := horizonclientVar.SubmitTransactionXDR(txeB64)
+	if e != nil {
+		log.Printf(" error: While Submitting Tx: %s\n", e)
+		return 
+	}
+	log.Printf("tx confirmation hash: %s\n",  resp.Hash)
 	return
-
 }
 
 func (sdex *SDEX) submit(txeB64 string, asyncCallback func(hash string, e error), asyncMode bool) {

@@ -8,7 +8,7 @@ data:
   custom_config.cfg: |
     # Sample custom config file for the kelp bot
     #auth0
-    AUTH0_ENABLED=false
+    AUTH0_ENABLED=true
 
     #auth0 domain
     DOMAIN="dev-orunpay.eu.auth0.com"  #"domain_goes_here" #example "dev-*******.eu.auth0.com"
@@ -30,4 +30,4 @@ data:
     DELEGATED_SIGNING_URL="https://orunpay-api.herokuapp.com/v1/transactions/sep0007"
 
     #delegated callback url here
-    CALLBACK_URL="callback_url_goes_here"
+    CALLBACK_URL="https://trader.orunpay.com/api/v1/signedCallback"
