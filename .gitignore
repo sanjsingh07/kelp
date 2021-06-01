@@ -3,6 +3,7 @@ trader/configs/
 trader/scripts/
 terminator/configs/
 vendor/
+k8s/
 coverage.txt
 build/
 bin/
