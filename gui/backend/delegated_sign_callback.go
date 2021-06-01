@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"fmt"
-
+	// "log"
 	"io/ioutil"
 	"strings"
 	"github.com/stellar/kelp/plugins"
@@ -17,6 +17,7 @@ func (s *APIServer) /*(t *delegatedSignSubmit)*/ signedCallback(w http.ResponseW
 		s.writeErrorJson(w, fmt.Sprintf("error when reading request input: %s\n", e))
 		return
 	}
+	// log.Printf("signedCallback requestJson line 23: %s\n", string(signedTXBODY))
 
 	stringToBeMani := string(signedTXBODY)
 	strParts := strings.Split(stringToBeMani, "&")
@@ -27,9 +28,10 @@ func (s *APIServer) /*(t *delegatedSignSubmit)*/ signedCallback(w http.ResponseW
 		s.writeErrorJson(w, fmt.Sprintf("error when decoding encodedSignedXDR: %s\n", e))
 		return
 	}
-	network_passphrase := strings.Split(strParts[1], "+")
+	network_passphrase := strings.Split(strParts[2], "+")
 	HorizonUrl := strings.Split(network_passphrase[0], "network_passphrase=")
 	decodedHorizonUrl, err := url.QueryUnescape(HorizonUrl[1])
+	// decodedHorizonUrl := string(HorizonUrl[1])
 	if err != nil {
 		s.writeErrorJson(w, fmt.Sprintf("error when decoding encodedSignedXDR: %s\n", e))
 		return

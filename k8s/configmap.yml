@@ -30,4 +30,4 @@ data:
     DELEGATED_SIGNING_URL="https://orunpay-api.herokuapp.com/v1/transactions/sep0007"
 
     #delegated callback url here
-    CALLBACK_URL="https://trader.orunpay.com/api/v1/signedCallback"
+    CALLBACK_URL="https://trader.orunpay.com/signedCallback"

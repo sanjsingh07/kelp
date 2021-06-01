@@ -6,13 +6,13 @@ import (
 	// "fmt"
 	"net/http"
 	"strings"
-	"log"
+	// "log"
 
 	"github.com/auth0/go-jwt-middleware"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/stellar/kelp/configStruct"
 	"github.com/stellar/kelp/support/kelpos"
-	"github.com/stellar/kelp/support/toml"
+	// "github.com/stellar/kelp/support/toml"
 )
 
 type Response struct {
@@ -38,23 +38,14 @@ var userIDfromjwt string
 var DataPath, UsersSpecificBot, BotConfigsPath, BotLogsPath *kelpos.OSPath
 
 func callFromJWTMiddlewareVar() {
-	kos := kelpos.GetKelpOS()
+	// kos := kelpos.GetKelpOS()
 	trimmedID := strings.TrimLeft(userIDfromjwt, "auth0|")
 
 	UserIDGlobal := "user_"+trimmedID
-	DataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+	// DataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
 
 	UsersSpecificBot = DataPath.Join(UserIDGlobal)
 	BotConfigsPath = UsersSpecificBot.Join("configs")
-	configFilePath := DataPath.Join("custom_config.cfg")
-	// if e != nil {
-	// 	log.Printf("error creating custom_config.cfg: %s\n", e)
-	// }
-	e := toml.WriteFile(configFilePath.Native(), &CustomConfigVarJWT)
-	if e != nil {
-		log.Printf("error writing Custom Config toml file: %s\n", e)
-		return
-	}
 	BotLogsPath = UsersSpecificBot.Join("logs")
 }
 

@@ -364,23 +364,22 @@ func init() {
 				panic(e)
 			}
 		}
-
+		dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+		configFilePath := dataPath.Join("custom_config.cfg")
+		// if e != nil {
+		// 	log.Printf("error creating custom_config.cfg: %s\n", e)
+		// }
+		errtest := toml.WriteFile(configFilePath.Native(), &customConfigVar)
+		if errtest != nil {
+			log.Printf("error writing Custom Config toml file: %s\n", errtest)
+			return
+		}
+		backend.DataPath = dataPath
 		if(!customConfigVar.Auth0Enabled){
-			dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
 			usersSpecificBot := dataPath.Join()
 			botConfigsPath := usersSpecificBot.Join("configs")
 			botLogsPath := usersSpecificBot.Join("logs")
-			configFilePath := dataPath.Join("custom_config.cfg")
-			// if e != nil {
-			// 	log.Printf("error creating custom_config.cfg: %s\n", e)
-			// }
-			e := toml.WriteFile(configFilePath.Native(), &customConfigVar)
-			if e != nil {
-				log.Printf("error writing Custom Config toml file: %s\n", e)
-				return
-			}
-		
-			backend.DataPath = dataPath
+
 			backend.UsersSpecificBot = usersSpecificBot
 			backend.BotConfigsPath = botConfigsPath
 			backend.BotLogsPath = botLogsPath
