@@ -1,0 +1,9 @@
+{
+ "auth0_enabled": false,
+ "domain": "",
+ "client_id": "",
+ "audience": "",
+ "delegated_enabled": false,
+ "delegated_signing_url": "",
+ "callback_url": ""
+}

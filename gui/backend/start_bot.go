@@ -110,7 +110,6 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 	if e != nil {
 		return fmt.Errorf("unable to get relative path of custom config path from basepath: %s", e)
 	}
-	// fmt.Println(customConfigPath)
 
 	command := fmt.Sprintf("trade -c %s -s %s -f %s -l %s -x %s --ui",
 		traderRelativeConfigPath.Unix(),
@@ -119,6 +118,16 @@ func (s *APIServer) doStartBot(botName string, strategy string, iterations *uint
 		logRelativePrefixPath.Unix(),
 		customConfigRelativePath.Unix(),
 	)
+	
+	if(strings.Contains(botName, "George The Auspicious Octopus")){
+		command = fmt.Sprintf("trade -c %s -s %s -f %s -l %s --ui",
+		traderRelativeConfigPath.Unix(),
+		strategy,
+		stratRelativeConfigPath.Unix(),
+		logRelativePrefixPath.Unix(),
+		)
+	}
+	
 	if iterations != nil {
 		command = fmt.Sprintf("%s --iter %d", command, *iterations)
 	}

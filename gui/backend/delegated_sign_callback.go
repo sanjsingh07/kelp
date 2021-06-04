@@ -28,7 +28,7 @@ func (s *APIServer) /*(t *delegatedSignSubmit)*/ signedCallback(w http.ResponseW
 		s.writeErrorJson(w, fmt.Sprintf("error when decoding encodedSignedXDR: %s\n", e))
 		return
 	}
-	network_passphrase := strings.Split(strParts[2], "+")
+	network_passphrase := strings.Split(strParts[1], "+")
 	HorizonUrl := strings.Split(network_passphrase[0], "network_passphrase=")
 	decodedHorizonUrl, err := url.QueryUnescape(HorizonUrl[1])
 	// decodedHorizonUrl := string(HorizonUrl[1])
@@ -46,5 +46,5 @@ func (s *APIServer) /*(t *delegatedSignSubmit)*/ signedCallback(w http.ResponseW
 	plugins.SubmitDelegatedTX(decodedXDR, decodedHorizonUrl)
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("{ok}"))
+// 	w.Write([]byte("Status: 200 OK"))
 }
