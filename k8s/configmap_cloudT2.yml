@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflare-config2
+  labels:
+    app: cloudflared2
+data:
+  config.yml: |
+    #config file stuct for cloudflare container/image
+    url: 10.0.233.22 #20.79.74.216
+    tunnel: b2803b0e-2d3a-4ad1-8150-a8825bfa0a7d
+    # loglevel: debug
+  
+  tunnel2-credentials.json: |
+    #credentials of cloudflare tunnel #2
+    {
+      "AccountTag":"9eb83c9e3abc33da21a02e3adbc610f2",
+      "TunnelSecret":"Ml9HwsYuRu0i6XqTvQbIpo+EZC7t6JuY43vs3kUMDls=",
+      "TunnelID":"b2803b0e-2d3a-4ad1-8150-a8825bfa0a7d",
+      "TunnelName":"orunpay_kelp_test_2"
+    }
