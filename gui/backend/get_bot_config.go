@@ -46,7 +46,6 @@ func (s *APIServer) getBotConfig(w http.ResponseWriter, r *http.Request) {
 	botName := req.BotName
 
 	filenamePair := model2.GetBotFilenames(botName, "buysell")
-	traderFilePath := BotConfigsPath.Join(filenamePair.Trader)
 	traderFilePath := s.botConfigsPathForUser(req.UserData.ID).Join(filenamePair.Trader)
 	var botConfig trader.BotConfig
 	e = config.Read(traderFilePath.Native(), &botConfig)
@@ -60,7 +59,6 @@ func (s *APIServer) getBotConfig(w http.ResponseWriter, r *http.Request) {
 		))
 		return
 	}
-	strategyFilePath := BotConfigsPath.Join(filenamePair.Strategy)
 	strategyFilePath := s.botConfigsPathForUser(req.UserData.ID).Join(filenamePair.Strategy)
 	var buysellConfig plugins.BuySellConfig
 	e = config.Read(strategyFilePath.Native(), &buysellConfig)

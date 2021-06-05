@@ -89,8 +89,6 @@ func (s *APIServer) deleteBot(w http.ResponseWriter, r *http.Request) {
 
 	// delete configs
 	botPrefix := model2.GetPrefix(botName)
-	botConfigPath := BotConfigsPath.Join(botPrefix)
-	_, e = s.kos.Blocking("rm", fmt.Sprintf("rm %s*", botConfigPath.Unix()))
 	botConfigPath := s.botConfigsPathForUser(req.UserData.ID).Join(botPrefix)
 	_, e = s.kos.Blocking(req.UserData.ID, "rm", fmt.Sprintf("rm %s*", botConfigPath.Unix()))
 	if e != nil {

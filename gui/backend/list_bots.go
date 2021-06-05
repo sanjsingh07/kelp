@@ -51,11 +51,6 @@ func (s *APIServer) listBots(w http.ResponseWriter, r *http.Request) {
 	w.Write(botsJSON)
 }
 
-func (s *APIServer) doListBots() ([]model2.Bot, error) {
-
-
-	bots := []model2.Bot{}
-	resultBytes, e := s.kos.Blocking("ls", fmt.Sprintf("ls %s | sort", BotConfigsPath.Unix())) //.unix was already there
 func (s *APIServer) doListBots(userData UserData) ([]model2.Bot, error) {
 	bots := []model2.Bot{}
 	resultBytes, e := s.kos.Blocking(userData.ID, "ls", fmt.Sprintf("ls %s | sort", s.botConfigsPathForUser(userData.ID).Unix()))

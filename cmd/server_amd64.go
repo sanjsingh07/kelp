@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/png"
@@ -30,9 +29,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/stellar/go/clients/horizonclient"
-	"github.com/stellar/go/support/config"
 	"github.com/stellar/go/support/errors"
-	"github.com/stellar/kelp/configStruct"
 	"github.com/stellar/kelp/gui"
 	"github.com/stellar/kelp/gui/backend"
 	"github.com/stellar/kelp/plugins"
@@ -72,10 +69,10 @@ type serverInputOptions struct {
 	verbose           *bool
 	noElectron        *bool
 	disablePubnet     *bool
-	customConfig      *string
 	enableKaas        *bool
 	tlsCertFile       *string
 	tlsKeyFile        *string
+	guiConfig		  *string
 }
 
 // String is the stringer method impl.
@@ -84,25 +81,7 @@ func (o serverInputOptions) String() string {
 		*o.port, *o.dev, *o.devAPIPort, *o.horizonTestnetURI, *o.horizonPubnetURI, *o.noHeaders, *o.verbose, *o.noElectron, *o.disablePubnet, *o.enableKaas)
 }
 
-// function for reading custom config file and returning config struct with intilized value
-func readCustomConfig(options serverInputs) configStruct.CustomConfigStruct {
-	var customConfigInFunc configStruct.CustomConfigStruct
-	e := config.Read(*options.customConfig, &customConfigInFunc)
-	// utils.CheckConfigError(customConfigInFunc, e, *options.customConfig)
-	if e != nil {
-		fmt.Println(e)
-	}
-
-	return customConfigInFunc
-}
-
-// customConfigVar Variable with its equivalent struct #used to inject config values to jwt config var
-var customConfigVar configStruct.CustomConfigStruct
-
 func init() {
-
-	options := serverInputs{}
-	options.port = serverCmd.Flags().Uint16P("port", "p", 8000, "port on which to serve")
 	options := serverInputOptions{}
 	options.port = serverCmd.Flags().Uint16P("port", "p", 8000, "port on which to serve HTTP")
 	options.ports = serverCmd.Flags().Uint16P("ports", "P", 8001, "port on which to serve HTTPS (only applicable if tls cert and key provided)")
@@ -114,10 +93,10 @@ func init() {
 	options.verbose = serverCmd.Flags().BoolP("verbose", "v", false, "enable verbose log lines typically used for debugging")
 	options.noElectron = serverCmd.Flags().Bool("no-electron", false, "open in browser instead of using electron, only applies when not in KaaS mode")
 	options.disablePubnet = serverCmd.Flags().Bool("disable-pubnet", false, "disable pubnet option")
-	options.customConfig = serverCmd.Flags().StringP("custom-config", "c", "", "custom config for auth0 and delegated basic config file path") //custom-config flag
 	options.enableKaas = serverCmd.Flags().Bool("enable-kaas", false, "enable kelp-as-a-service (KaaS) mode, which does not bring up browser or electron")
 	options.tlsCertFile = serverCmd.Flags().String("tls-cert-file", "", "path to TLS certificate file")
 	options.tlsKeyFile = serverCmd.Flags().String("tls-key-file", "", "path to TLS key file")
+	options.guiConfig = serverCmd.Flags().StringP("custom-config", "c", "", "custom config for auth0 and delegated basic config file path")  //custom-config flag
 
 	serverCmd.Run = func(ccmd *cobra.Command, args []string) {
 		isLocalMode := env == envDev
@@ -135,20 +114,6 @@ func init() {
 				panic(e)
 			}
 		}
-
-		//opening/creating "custom_config_ui" file in ./gui/web/src
-		filePathname, _ := filepath.Abs("../kelp/gui/web/src/" + "custom_config_ui.json")
-
-		//calliing readCustomConfig func and then inject values into JWT_middleware customconfigvar
-		customConfigVar = readCustomConfig(options)
-		backend.CustomConfigVar = customConfigVar
-
-		//short var for custom config struct initialzer for UI config file
-		shortVarForUIConfig := configStruct.CustomConfigStruct{}
-
-		//writing to "custom_config_ui" file in ./gui/web/src
-		file, _ := json.MarshalIndent(shortVarForUIConfig, "", " ")
-		_ = ioutil.WriteFile(filePathname, file, 0644)
 
 		e = backend.InitBotNameRegex()
 		if e != nil {
@@ -402,26 +367,13 @@ func init() {
 			}
 		}
 
-		if !customConfigVar.Auth0Enabled {
-			dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
-			usersSpecificBot := dataPath.Join()
-			botConfigsPath := usersSpecificBot.Join("configs")
-			botLogsPath := usersSpecificBot.Join("logs")
-
-			backend.UsersSpecificBot = usersSpecificBot
-			backend.BotConfigsPath = botConfigsPath
-			backend.BotLogsPath = botLogsPath
-
-		}
-		// dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
-		// usersSpecificBot := dataPath.Join("user_id_goes_here")
-		// botConfigsPath := usersSpecificBot.Join("configs")
-		// botLogsPath := usersSpecificBot.Join("logs")
+		dataPath := kos.GetDotKelpWorkingDir().Join("bot_data")
+		botConfigsPath := dataPath.Join("configs")
+		botLogsPath := dataPath.Join("logs")
 		s, e := backend.MakeAPIServer(
 			kos,
-			// usersSpecificBot,
-			// botConfigsPath,
-			// botLogsPath,
+			botConfigsPath,
+			botLogsPath,
 			*options.horizonTestnetURI,
 			apiTestNet,
 			*options.horizonPubnetURI,
@@ -437,10 +389,10 @@ func init() {
 			panic(e)
 		}
 
-		// e = s.InitBackend()
-		// if e != nil {
-		// 	panic(e)
-		// }
+		e = s.InitBackend()
+		if e != nil {
+			panic(e)
+		}
 
 		guiWebPath := kos.GetBinDir().Join("../gui/web")
 		if isLocalDevMode {
@@ -463,11 +415,7 @@ func init() {
 
 		r := chi.NewRouter()
 		setMiddleware(r)
-		if customConfigVar.Auth0Enabled {
-			backend.SetRoutesWithAuth0(r, s)
-		} else {
-			backend.SetRoutes(r, s)
-		}
+		backend.SetRoutes(r, s)
 		// gui.FS is automatically compiled based on whether this is a local or deployment build
 		gui.FileServer(r, "/", gui.FS)
 
@@ -659,7 +607,6 @@ func runCcxtBinary(kos *kelpos.KelpOS, userID string, ccxtBinPath *kelpos.OSPath
 }
 
 func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPort uint16) {
-
 	r := chi.NewRouter()
 	// Add CORS middleware around every request since both ports are different when running server in dev mode
 	r.Use(cors.New(cors.Options{
@@ -667,11 +614,7 @@ func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPo
 	}).Handler)
 
 	setMiddleware(r)
-	if customConfigVar.Auth0Enabled {
-		backend.SetRoutesWithAuth0(r, s)
-	} else {
-		backend.SetRoutes(r, s)
-	}
+	backend.SetRoutes(r, s)
 	portString := fmt.Sprintf(":%d", devAPIPort)
 	log.Printf("Serving API server on HTTP port: %d\n", devAPIPort)
 	e := http.ListenAndServe(portString, r)
@@ -743,35 +686,14 @@ func writeTrayIcon(kos *kelpos.KelpOS, trayIconPath *kelpos.OSPath, assetsDirPat
 	return nil
 }
 
-// func openBrowser(url string, openBrowserWg *sync.WaitGroup) {
-// 	log.Printf("opening URL in native browser: %s", url)
-// 	openBrowserWg.Wait()
-
-// 	e := browser.OpenURL(url)
-// 	if e != nil {
-// 		log.Fatal(e)
-// 	}
-// }
-
 func openBrowser(url string, openBrowserWg *sync.WaitGroup) {
+	log.Printf("opening URL in native browser: %s", url)
+	openBrowserWg.Wait()
 
-	if runtime.GOOS == "linux" {
-		_, err := exec.LookPath("xdg-open")
-		if err != nil {
-			log.Printf("please open your browser at url: %s", url)
-			//return nil
-		}
-	} else {
-
-		log.Printf("opening URL in native browser: %s", url)
-		openBrowserWg.Wait()
-
-		e := browser.OpenURL(url)
-		if e != nil {
-			log.Fatal(e)
-		}
+	e := browser.OpenURL(url)
+	if e != nil {
+		log.Fatal(e)
 	}
-
 }
 
 func openElectron(trayIconPath *kelpos.OSPath, url string) {

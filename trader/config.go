@@ -7,10 +7,7 @@ import (
 	"github.com/stellar/kelp/support/postgresdb"
 	"github.com/stellar/kelp/support/toml"
 	"github.com/stellar/kelp/support/utils"
-	"github.com/stellar/kelp/configStruct"
 )
-
-var customConfigVar configStruct.CustomConfigStruct
 
 // XLM is a constant for XLM
 const XLM = "XLM"
@@ -24,13 +21,12 @@ type FeeConfig struct {
 
 // BotConfig represents the configuration params for the bot
 type BotConfig struct {
-	SourceSecretSeed string `valid:"-" toml:"SOURCE_SECRET_SEED" json:"source_secret_seed"`
-	TradingKeySeed   string `valid:"-" toml:"TRADING_KEY_SEED" json:"trading_key_seed"`
-	// TradingPublicSeed string `valid:"-" toml:"TRADING_PUBLIC_SEED" json:"trading_public_seed"`
-	AssetCodeA string `valid:"-" toml:"ASSET_CODE_A" json:"asset_code_a"`
-	IssuerA    string `valid:"-" toml:"ISSUER_A" json:"issuer_a"`
-	AssetCodeB string `valid:"-" toml:"ASSET_CODE_B" json:"asset_code_b"`
-	IssuerB    string `valid:"-" toml:"ISSUER_B" json:"issuer_b"`
+	SourceSecretSeed  string `valid:"-" toml:"SOURCE_SECRET_SEED" json:"source_secret_seed"`
+	TradingSecretSeed string `valid:"-" toml:"TRADING_SECRET_SEED" json:"trading_secret_seed"`
+	AssetCodeA        string `valid:"-" toml:"ASSET_CODE_A" json:"asset_code_a"`
+	IssuerA           string `valid:"-" toml:"ISSUER_A" json:"issuer_a"`
+	AssetCodeB        string `valid:"-" toml:"ASSET_CODE_B" json:"asset_code_b"`
+	IssuerB           string `valid:"-" toml:"ISSUER_B" json:"issuer_b"`
 	// Deprecated: use TICK_INTERVAL_MILLIS instead
 	TickIntervalSecondsDeprecated      int32      `valid:"-" toml:"TICK_INTERVAL_SECONDS" json:"tick_interval_seconds" deprecated:"true"`
 	TickIntervalMillis                 int32      `valid:"-" toml:"TICK_INTERVAL_MILLIS" json:"tick_interval_millis"`
@@ -81,7 +77,7 @@ type BotConfig struct {
 // MakeBotConfig factory method for BotConfig
 func MakeBotConfig(
 	sourceSecretSeed string,
-	tradingKeySeed string,
+	tradingSecretSeed string,
 	assetCodeA string,
 	issuerA string,
 	assetCodeB string,
@@ -104,7 +100,7 @@ func MakeBotConfig(
 ) *BotConfig {
 	return &BotConfig{
 		SourceSecretSeed:                   sourceSecretSeed,
-		TradingKeySeed:                     tradingKeySeed,
+		TradingSecretSeed:                  tradingSecretSeed,
 		AssetCodeA:                         assetCodeA,
 		IssuerA:                            issuerA,
 		AssetCodeB:                         assetCodeB,
@@ -134,7 +130,7 @@ func (b BotConfig) String() string {
 		"EXCHANGE_PARAMS":          utils.Hide,
 		"EXCHANGE_HEADERS":         utils.Hide,
 		"SOURCE_SECRET_SEED":       utils.SecretKey2PublicKey,
-		"TRADING_KEY_SEED":         utils.SecretKey2PublicKey,
+		"TRADING_SECRET_SEED":      utils.SecretKey2PublicKey,
 		"ALERT_API_KEY":            utils.Hide,
 		"GOOGLE_CLIENT_ID":         utils.Hide,
 		"GOOGLE_CLIENT_SECRET":     utils.Hide,
@@ -206,11 +202,9 @@ func (b *BotConfig) Init() error {
 	}
 	b.assetQuote = *asset
 
-	if(!customConfigVar.DelegatedEnabled){
-		b.tradingAccount, e = utils.ParseSecret(b.TradingKeySeed)
-		if e != nil {
-			return e
-		}
+	b.tradingAccount, e = utils.ParseSecret(b.TradingSecretSeed)
+	if e != nil {
+		return e
 	}
 	if b.tradingAccount == nil {
 		return fmt.Errorf("no trading account specified")

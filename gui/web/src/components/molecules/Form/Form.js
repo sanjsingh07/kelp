@@ -23,12 +23,10 @@ import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import newSecretKey from '../../../kelp-ops-api/newSecretKey';
 import fetchPrice from '../../../kelp-ops-api/fetchPrice';
 import SecretKey from '../SecretKey/SecretKey';
-import deConfig from "../../../custom_config_ui.json";
 
 const fiatURLPrefix = "http://apilayer.net/api/live?access_key=";
 const fiatURLCurrencyParam = "&currencies=";
 const currencyLayerWebsite = "https://currencylayer.com/";
-const deConfigEnabled = deConfig.delegated_enabled;
 
 class Form extends Component {
   constructor(props) {
@@ -517,44 +515,25 @@ class Form extends Component {
                   }
                   this.props.onChange("trader_config.horizon_url", { target: { value: newValue } });
                 }}
+                error={this.getError("trader_config.horizon_url")}
               />
             </FieldItem>
           </FormSection>
-       
-              {deConfigEnabled ? (
-              <FormSection>
-                <FieldItem>
-                <Label>Trader account public key</Label>
-                <Input
-                  value={this.props.configData.trader_config.trading_key_seed}
-                  // label="Trader account public key"
-                  type="string"
-                  // isTestNet={isTestNet}
-                  // secret={this.props.configData.trader_config.trading_public_seed}
-                  onChange={(event) => { this.props.onChange("trader_config.trading_key_seed", event) }}
-                  onError={() => this.getError("trader_config.trading_key_seed")}
-                  // onNewKeyClick={() => this.newSecret("trader_config.trading_public_seed")}
+            
+            <FormSection>
+              <FieldItem>
+                <SecretKey
+                  label="Trader account secret key"
+                  isTestNet={isTestNet}
+                  secret={this.props.configData.trader_config.trading_secret_seed}
+                  onSecretChange={(event) => { this.props.onChange("trader_config.trading_secret_seed", event) }}
+                  onError={() => this.getError("trader_config.trading_secret_seed")}
+                  onNewKeyClick={() => this.newSecret("trader_config.trading_secret_seed")}
                   readOnly={this.props.readOnly}
-                  // eventPrefix={this.props.eventPrefix + "-publickey-trader"}
+                  eventPrefix={this.props.eventPrefix + "-secretkey-trader"}
                 />
-                </FieldItem>
-             </FormSection>
-              ) : (
-              <FormSection>
-                  <FieldItem>
-                    <SecretKey
-                      label="Trader account secret key"
-                      isTestNet={isTestNet}
-                      secret={this.props.configData.trader_config.trading_key_seed}
-                      onSecretChange={(event) => { this.props.onChange("trader_config.trading_key_seed", event) }}
-                      onError={() => this.getError("trader_config.trading_key_seed")}
-                      onNewKeyClick={() => this.newSecret("trader_config.trading_key_seed")}
-                      readOnly={this.props.readOnly}
-                      eventPrefix={this.props.eventPrefix + "-secretkey-trader"}
-                    />
-                  </FieldItem>
-                </FormSection>
-                )}
+              </FieldItem>
+            </FormSection>
 
             {/* <FormSection tip="Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Etiam purus nunc, rhoncus ac lorem eget, eleifend congue nisl."> */}
             <FormSection wideCol={80}>

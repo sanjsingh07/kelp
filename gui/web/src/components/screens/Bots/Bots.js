@@ -10,7 +10,6 @@ import listBots from '../../../kelp-ops-api/listBots';
 import Constants from '../../../Constants';
 import Modal from '../../molecules/Modal/Modal';
 
-
 class Bots extends Component {
   constructor(props) {
     super(props);

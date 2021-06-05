@@ -1,7 +1,5 @@
 export default (baseUrl) => {
-    return fetch(baseUrl + "/api/v1/newSecretKey",{
-        method: "GET"
-        }).then(resp => {
+    return fetch(baseUrl + "/api/v1/newSecretKey").then(resp => {
         return resp.text();
     });
 };

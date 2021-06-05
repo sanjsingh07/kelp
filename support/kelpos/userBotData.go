@@ -66,15 +66,6 @@ func (ubd *UserBotData) registerBotWithState(bot *model2.Bot, state BotState, fo
 	ubd.botLock.Lock()
 	defer ubd.botLock.Unlock()
 
-<<<<<<< HEAD:support/kelpos/bots.go
-	// _, exists := kos.bots[bot.Name]
-	// if exists {
-	// 	if !forceRegister {
-	// 		return fmt.Errorf("bot '%s' already registered", bot.Name)
-	// 	}
-	// 	log.Printf("bot '%s' already registered, but re-registering with state '%s' because forceRegister was set", bot.Name, state)
-	// }
-=======
 	_, exists := ubd.bots[bot.Name]
 	if exists {
 		if !forceRegister {
@@ -82,7 +73,6 @@ func (ubd *UserBotData) registerBotWithState(bot *model2.Bot, state BotState, fo
 		}
 		log.Printf("bot '%s' already registered, but re-registering with state '%s' because forceRegister was set", bot.Name, state)
 	}
->>>>>>> master:support/kelpos/userBotData.go
 
 	ubd.bots[bot.Name] = &BotInstance{
 		Bot:   bot,

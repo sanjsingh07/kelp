@@ -1,13 +1,10 @@
 package plugins
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
 	"math"
 	"net/http"
-	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -22,14 +19,11 @@ import (
 	hProtocol "github.com/stellar/go/protocols/horizon"
 	"github.com/stellar/go/txnbuild"
 	"github.com/stellar/kelp/api"
-	"github.com/stellar/kelp/configStruct"
 	"github.com/stellar/kelp/model"
 	"github.com/stellar/kelp/support/networking"
 	"github.com/stellar/kelp/support/utils"
 )
 
-var CustomConfigVarPlugins configStruct.CustomConfigStruct
-var HorizonURLForDelSigning string
 const baseReserve = 0.5
 const baseFee = 0.0000100
 const maxLumenTrust = math.MaxFloat64
@@ -406,15 +400,8 @@ func (sdex *SDEX) submitOps(opsOld []build.TransactionMutator, asyncCallback fun
 		return fmt.Errorf("unable to make new transaction: %s", e)
 	}
 
-	//Sanjay: implement new method for delegated signing
-	if(CustomConfigVarPlugins.DelegatedEnabled){
-		sdex.delegatedSign(tx)
-		return nil
-	}
-
 	// convert to xdr string
 	txeB64, e := sdex.sign(tx)
-
 	if e != nil {
 		return e
 	}
@@ -458,67 +445,6 @@ func (sdex *SDEX) sign(tx *txnbuild.Transaction) (string, error) {
 	}
 
 	return tx.Base64()
-}
-
-// Added by Sanjay to impplement deligated signing
-func (sdex *SDEX) delegatedSign(tx *txnbuild.Transaction) (error) {
-	var e error
-	if e != nil {
-		return e
-	}
-	txBase64, err := tx.Base64() //converting tx to txXDR base64
-	if err != nil {
-		return err
-	}
-	txB64URLEnc := url.QueryEscape(txBase64) //encoding with url Encoder
-
-	callback := CustomConfigVarPlugins.Callback //
-	callbackEnc := url.QueryEscape(callback) //encoding with url Encoder
-
-	network_passphrase := url.QueryEscape(HorizonURLForDelSigning) // to see what kinda of network is this one
-
-	pubkey := string(sdex.SourceAccount)
-	
-	URI := func(xdrBase64 string, pubkey string) string { return fmt.Sprintf("web+stellar:tx?xdr=%s&callback=%s&network_passphrase=%s&pubkey=%s", txB64URLEnc, callbackEnc, network_passphrase, pubkey) }
-	valueForJsonString := URI(txBase64, pubkey)
-
-	values := map[string]string{"uri": valueForJsonString}
-    json_data, err := json.Marshal(values)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-	//Invoke Orunpay API
-    resp, err := http.Post(CustomConfigVarPlugins.DelegatedSigningUrl, "application/json", bytes.NewBuffer(json_data))
-
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    var res map[string]interface{}
-    fmt.Println(resp)
-    json.NewDecoder(resp.Body).Decode(&res)
-    fmt.Println(res)
-    fmt.Println(res["json"])
-
-	return nil
-}
-
-func SubmitDelegatedTX(txeB64 string, horizonURL string /*, asyncCallback func(hash string, e error), asyncMode bool */) /*error*/ {
-
-	horizonclientVar := &horizonclient.Client{
-		HorizonURL: horizonURL,
-		HTTP:       http.DefaultClient,
-	}
-
-	resp, e := horizonclientVar.SubmitTransactionXDR(txeB64)
-	if e != nil {
-		log.Printf(" error: While Submitting Tx: %s\n", e)
-		return 
-	}
-	log.Printf(" Resp of Submitting Tx: %s\n", resp)
-	return
-
 }
 
 func (sdex *SDEX) submit(txeB64 string, asyncCallback func(hash string, e error), asyncMode bool) {

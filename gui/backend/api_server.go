@@ -41,22 +41,6 @@ type kelpErrorDataForUser struct {
 
 // APIServer is an instance of the API service
 type APIServer struct {
-	kelpBinPath       *kelpos.OSPath
-	// usersSpecificBot  *kelpos.OSPath
-	// botConfigsPath    *kelpos.OSPath
-	// botLogsPath       *kelpos.OSPath
-	kos               *kelpos.KelpOS
-	horizonTestnetURI string
-	horizonPubnetURI  string
-	ccxtRestUrl       string
-	apiTestNet        *horizonclient.Client
-	apiPubNet         *horizonclient.Client
-	disablePubnet     bool
-	noHeaders         bool
-	quitFn            func()
-	metricsTracker    *plugins.MetricsTracker
-	kelpErrorMap      map[string]KelpError
-	kelpErrorMapLock  *sync.Mutex
 	kelpBinPath          *kelpos.OSPath
 	botConfigsPath       *kelpos.OSPath
 	botLogsPath          *kelpos.OSPath
@@ -80,9 +64,8 @@ type APIServer struct {
 // MakeAPIServer is a factory method
 func MakeAPIServer(
 	kos *kelpos.KelpOS,
-	// usersSpecificBot *kelpos.OSPath,
-	// botConfigsPath *kelpos.OSPath,
-	// botLogsPath *kelpos.OSPath,
+	botConfigsPath *kelpos.OSPath,
+	botLogsPath *kelpos.OSPath,
 	horizonTestnetURI string,
 	apiTestNet *horizonclient.Client,
 	horizonPubnetURI string,
@@ -103,9 +86,8 @@ func MakeAPIServer(
 
 	return &APIServer{
 		kelpBinPath:           kelpBinPath,
-		// usersSpecificBot:	   usersSpecificBot,
-		// botConfigsPath:        botConfigsPath,
-		// botLogsPath:           botLogsPath,
+		botConfigsPath:        botConfigsPath,
+		botLogsPath:           botLogsPath,
 		kos:                   kos,
 		horizonTestnetURI:     horizonTestnetURI,
 		horizonPubnetURI:      horizonPubnetURI,
@@ -123,16 +105,6 @@ func MakeAPIServer(
 	}, nil
 }
 
-// InitBackend initializes anything required to get the backend ready to serve
-// func (s *APIServer) InitBackend() error {
-// 	// initial load of bots into memory
-// 	_, e := s.doListBots()
-// 	if e != nil {
-// 		return fmt.Errorf("error listing/loading bots: %s", e)
-// 	}
-
-// 	return nil
-// }
 func (s *APIServer) botConfigsPathForUser(userID string) *kelpos.OSPath {
 	return s.botConfigsPath.Join(userID)
 }
@@ -329,21 +301,6 @@ func (s *APIServer) runKelpCommandBackground(userID string, namespace string, cm
 	return s.kos.Background(userID, namespace, cmdString)
 }
 
-func (s *APIServer) setupOpsDirectory() error {
-
-	e := s.kos.Mkdir(UsersSpecificBot)
-	if e != nil {
-		return fmt.Errorf("error setting up users directory (%s): %s\n", UsersSpecificBot, e)
-	}
-
-	e = s.kos.Mkdir(BotConfigsPath)
-	if e != nil {
-		return fmt.Errorf("error setting up configs directory (%s): %s\n", BotConfigsPath, e)
-	}
-
-	e = s.kos.Mkdir(BotLogsPath)
-	if e != nil {
-		return fmt.Errorf("error setting up logs directory (%s): %s\n", BotLogsPath, e)
 func (s *APIServer) setupOpsDirectory(userID string) error {
 	e := s.kos.Mkdir(userID, s.botConfigsPathForUser(userID))
 	if e != nil {

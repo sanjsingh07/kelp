@@ -78,9 +78,6 @@ func (s *APIServer) doGenerateBotName(userData UserData) (string, error) {
 	return botName, nil
 }
 
-func (s *APIServer) prefixExists(prefix string) (bool, error) {
-	command := fmt.Sprintf("ls %s | grep %s", BotConfigsPath.Unix(), prefix)
-	_, e := s.kos.Blocking("prefix", command)
 func (s *APIServer) prefixExists(userData UserData, prefix string) (bool, error) {
 	command := fmt.Sprintf("ls %s | grep %s", s.botConfigsPathForUser(userData.ID).Unix(), prefix)
 	_, e := s.kos.Blocking(userData.ID, "prefix", command)

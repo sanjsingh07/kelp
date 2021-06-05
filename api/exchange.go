@@ -230,7 +230,6 @@ type Balance struct {
 type ExchangeShim interface {
 	SubmitOps(ops []build.TransactionMutator, submitMode SubmitMode, asyncCallback func(hash string, e error)) error
 	SubmitOpsSynch(ops []build.TransactionMutator, submitMode SubmitMode, asyncCallback func(hash string, e error)) error // forced synchronous version of SubmitOps
-	// SubmitDelegatedTX(txeB64 string)
 	GetBalanceHack(asset hProtocol.Asset) (*Balance, error)
 	LoadOffersHack() ([]hProtocol.Offer, error)
 	Constrainable
