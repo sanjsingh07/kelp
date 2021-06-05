@@ -133,21 +133,20 @@ func init() {
 
 		//calliing readGUIConfig func and then inject values into JWT_middleware customconfigvar 
 		auth0ConfigVar = readGUIConfig(options)
-		fmt.Println("printing at line 136: ", auth0ConfigVar)
-		fmt.Println("printing at line 137: ", auth0ConfigVar.Auth0)
 		backend.Auth0ConfigVarJWT = auth0ConfigVar
 
 		//opening/creating "auth0-config.json" file in ./gui/web/src
 		filePathname, _ := filepath.Abs("../kelp/gui/web/src/" + "auth0-config.json")
 
-		shortVarForUIConfig := guiconfig.Auth0{
-			Auth0Enabled : auth0ConfigVar.Auth0.Auth0Enabled,
-			Domain :	   auth0ConfigVar.Auth0.Domain,
-			ClientId :	   auth0ConfigVar.Auth0.ClientId,
-			Audience :	   auth0ConfigVar.Auth0.Audience,
+		shortVarForUIConfig := guiconfig.Auth0Config{}
+		if(auth0ConfigVar.Auth0Config != nil){
+			shortVarForUIConfig = guiconfig.Auth0Config{
+				Auth0Enabled : auth0ConfigVar.Auth0Config.Auth0Enabled,
+				Domain :	   auth0ConfigVar.Auth0Config.Domain,
+				ClientId :	   auth0ConfigVar.Auth0Config.ClientId,
+				Audience :	   auth0ConfigVar.Auth0Config.Audience,
+			}
 		}
-
-		fmt.Println("printing at line 149: ", shortVarForUIConfig)
 
 		//writing to "auth0-config.json" file in ./gui/web/src
 		file, _ := json.MarshalIndent(shortVarForUIConfig, "", " ")
@@ -453,7 +452,7 @@ func init() {
 
 		r := chi.NewRouter()
 		setMiddleware(r)
-		if auth0ConfigVar.Auth0.Auth0Enabled {
+		if auth0ConfigVar.Auth0Config.Auth0Enabled {
 			backend.SetRoutesWithAuth0(r, s)
 		} else {
 			backend.SetRoutes(r, s)
@@ -656,7 +655,7 @@ func runAPIServerDevBlocking(s *backend.APIServer, frontendPort uint16, devAPIPo
 	}).Handler)
 
 	setMiddleware(r)
-	if auth0ConfigVar.Auth0.Auth0Enabled {
+	if auth0ConfigVar.Auth0Config.Auth0Enabled {
 		backend.SetRoutesWithAuth0(r, s)
 	} else {
 		backend.SetRoutes(r, s)
