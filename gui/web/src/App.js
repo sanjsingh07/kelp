@@ -14,6 +14,7 @@ import removeKelpErrors from './kelp-ops-api/removeKelpErrors';
 import Welcome from './components/molecules/Welcome/Welcome';
 import LoginRedirect  from './components/screens/LogAuth/LoginRedirect';
 import { interceptor } from './kelp-ops-api/interceptor';
+import { withAuth0 } from '@auth0/auth0-react';
 
 let baseUrl = function () {
   let base_url = window.location.origin;
@@ -50,7 +51,53 @@ class App extends Component {
     this._asyncRequests = {};
   }
 
+  // async componentWillMount(){
+  //   const { user,isAuthenticated, loginWithRedirect, getAccessTokenSilently } = this.props.auth0;
+  //       if(isAuthenticated){
+  //     console.log("we are authenticated")
+  //     getAccessTokenSilently().then(token => localStorage.setItem("accessToken", token))
+  //   }
+
+  //   if (window.location.search.includes('code=')) {
+	// 		return this.handleRedirectCallback();
+	// 	}
+  //   // if (!isAuthenticated) {
+  //   //   await loginWithRedirect()
+  //   // }
+  //   console.log("we are not authenticated")
+
+  //   if(isAuthenticated){
+  //     console.log("we are authenticated")
+  //     getAccessTokenSilently().then(token => localStorage.setItem("accessToken", token))
+  //   }
+  // }
+
   componentDidMount() {
+    const { user,isAuthenticated, loginWithRedirect, getAccessTokenSilently } = this.props.auth0;
+
+    // const { getAccessTokenSilently } = this.props.auth0;
+    // getAccessTokenSilently().then(token => localStorage.setItem("accessToken", token))
+    console.log(isAuthenticated)
+    
+    if(isAuthenticated){
+      console.log("we are authenticated in componentDidMount")
+      getAccessTokenSilently().then(token => localStorage.setItem("accessToken", token))
+    }
+    if(!isAuthenticated){
+      console.log("we are not authenticated in componentDidMount")
+      getAccessTokenSilently().then(token => localStorage.setItem("accessToken", token))
+    }
+
+    // if(isAuthenticated){
+    //   const userIDKey = 'user_id';
+    //   const Auth0ID = JSON.stringify(user.sub).slice(7).replace('"', '')
+    //   console.log('the profile ' +JSON.stringify(Auth0ID));
+    //   localStorage.setItem(userIDKey, Auth0ID);
+    //   const accessToken = await getAccessTokenSilently();
+    //   localStorage.setItem("accessToken", accessToken);
+    // }
+
+    // this.getAccessToken();
     this.setVersion()
     this.fetchServerMetadata();
 
@@ -59,6 +106,31 @@ class App extends Component {
       this._fetchKelpErrorsTimer = setInterval(this.fetchKelpErrors, 500);
     }
   }
+
+  // getAccessToken = async () => {
+  //   const { user, getAccessTokenSilently } = this.props.auth0;
+  //   const token = await getAccessTokenSilently();
+  //   localStorage.setItem("accessToken", token);
+  //   const userIDKey = 'user_id';
+  //   const Auth0ID = JSON.stringify(user.sub).slice(7).replace('"', '')
+  //   console.log('the profile ' +JSON.stringify(Auth0ID));
+  //   localStorage.setItem(userIDKey, Auth0ID);
+
+  // }
+
+  handleRedirectCallback = async () => {
+		// this.setState({ isLoading: true });
+
+		// await this.state.auth0.handleRedirectCallback();
+		// const user = await this.state.auth0.getUser();
+    // console.log('the profile ' +JSON.stringify(user));
+    // const { user,isAuthenticated, loginWithRedirect, getAccessTokenSilently } = this.props.auth0;
+    // console.log(isAuthenticated)
+
+
+		// this.setState({ isAuthenticated: true, isLoading: false });
+		window.history.replaceState({}, document.title, window.location.pathname);
+	};
 
   setVersion() {
     var _this = this
@@ -378,4 +450,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withAuth0(App);

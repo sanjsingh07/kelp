@@ -10,12 +10,13 @@ const auth0enabled = config.auth0_enabled;
 
 ReactDOM.render(
   <div>
-    {auth0enabled ? (<Auth0Provider
+    {auth0enabled ? (
+  <Auth0Provider
   domain= {config.domain}
   clientId= {config.client_id}
   redirectUri= {window.location.origin}
   audience= {config.audience}
->
+  >
   <App />
   </Auth0Provider>) : (<App />)}
     </div>,
